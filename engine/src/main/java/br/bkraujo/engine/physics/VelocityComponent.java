@@ -1,4 +1,4 @@
-package br.bkraujo.engine.scene.actor.component;
+package br.bkraujo.engine.physics;
 
 import br.bkraujo.engine.scene.actor.Component;
 

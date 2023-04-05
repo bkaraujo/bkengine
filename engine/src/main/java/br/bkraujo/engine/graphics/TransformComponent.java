@@ -1,4 +1,4 @@
-package br.bkraujo.engine.scene.actor.component;
+package br.bkraujo.engine.graphics;
 
 import br.bkraujo.engine.scene.actor.Component;
 import br.bkraujo.utils.Vectors;

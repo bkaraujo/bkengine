@@ -3,9 +3,9 @@ package br.bkraujo.engine.scene.actor;
 import br.bkraujo.engine.Lifecycle;
 import br.bkraujo.engine.event.Event;
 import br.bkraujo.engine.event.OnEvent;
+import br.bkraujo.engine.graphics.TransformComponent;
 import br.bkraujo.engine.renderer.OnGui;
 import br.bkraujo.engine.scene.OnUpdate;
-import br.bkraujo.engine.scene.actor.component.TransformComponent;
 
 public abstract class Behaviour implements Lifecycle, OnUpdate, OnEvent, OnGui {
     private final Actor actor = new Actor();

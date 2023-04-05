@@ -3,6 +3,7 @@ package br.bkraujo.engine;
 import br.bkraujo.engine.core.graphics.Graphics;
 import br.bkraujo.engine.core.graphics.GraphicsContext;
 import br.bkraujo.engine.core.platform.Platform;
+import br.bkraujo.engine.core.temporal.Time;
 import br.bkraujo.engine.event.Event;
 import br.bkraujo.engine.platform.Window;
 import br.bkraujo.engine.scene.Scene;
@@ -87,15 +88,15 @@ public final class Application implements Lifecycle {
     }
 
     public void run() {
-        final var slice = 1000000000.0 / 75;
+        final var slice = Time.NANOSECOND / 75;
 
         var accumulator = 0f;
 
         var fps = 0;
         var ups = 0;
 
-        var lastTime = System.nanoTime();
-        long timer = System.currentTimeMillis();
+        var lastTime = Time.nanos();
+        long timer = Time.millis();
 
         window.show();
         info("Starting Game Loop");
@@ -103,13 +104,13 @@ public final class Application implements Lifecycle {
             if (Platform.Window.maximized) { platform.pollEvents(); continue; }
             tick++;
 
-            final var now = System.nanoTime();
+            final var now = Time.nanos();
             final var delta = (now - lastTime);
             lastTime += delta;
 
             accumulator += delta;
             while ((accumulator) > slice) {
-                scene.onUpdate((float) (delta / slice));
+                scene.onUpdate(slice / Time.NANOSECOND);
                 accumulator -= slice;
                 ups++;
             }
@@ -121,8 +122,8 @@ public final class Application implements Lifecycle {
 
             fps++;
 
-            final var current = System.currentTimeMillis();
-            if (current - timer > 1000) {
+            final var current = Time.millis();
+            if (current - timer > Time.SECOND) {
                 timer = current;
 
                 Application.fps = fps;
@@ -130,7 +131,7 @@ public final class Application implements Lifecycle {
                 ups = fps = 0;
             }
 
-             Application.frameTime = (System.nanoTime() - now) / 1_000_000.0f;
+             Application.frameTime = (Time.nanos() - now) / Time.MILLISECOND;
             platform.pollEvents();
         }
 

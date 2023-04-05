@@ -1,6 +1,5 @@
-package br.bkraujo.engine.scene.actor.component;
+package br.bkraujo.engine.graphics;
 
-import br.bkraujo.engine.graphics.GraphicsFactory;
 import br.bkraujo.engine.graphics.intrinsics.Shader;
 import br.bkraujo.engine.graphics.intrinsics.VertexArray;
 import br.bkraujo.engine.scene.actor.Component;

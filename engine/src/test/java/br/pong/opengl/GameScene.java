@@ -1,13 +1,13 @@
 package br.pong.opengl;
 
 import br.bkraujo.engine.graphics.GraphicsFactory;
+import br.bkraujo.engine.graphics.MeshComponent;
 import br.bkraujo.engine.graphics.intrinsics.BufferLayout;
 import br.bkraujo.engine.graphics.intrinsics.Shader;
 import br.bkraujo.engine.graphics.intrinsics.ShaderDataType;
+import br.bkraujo.engine.physics.VelocityComponent;
 import br.bkraujo.engine.scene.Scene;
 import br.bkraujo.engine.scene.actor.Actor;
-import br.bkraujo.engine.scene.actor.component.MeshComponent;
-import br.bkraujo.engine.scene.actor.component.VelocityComponent;
 import br.bkraujo.engine.scene.camera.Camera;
 import br.bkraujo.engine.scene.camera.OrthographicCamera;
 import br.bkraujo.engine.scene.layer.Layer;
@@ -51,10 +51,10 @@ public class GameScene extends Scene {
         //noinspection ConstantConditions
         left.getComponent(MeshComponent.class).array.addVertex(
                 new float[]{
-                        viewport.x() + 0.06f,  2f, 0.0f,  // top right
-                        viewport.x() + 0.06f, -2f, 0.0f,  // bottom right
-                        viewport.z() + 0.01f, -2f, 0.0f,  // bottom left
-                        viewport.z() + 0.01f,  2f, 0.0f   // top left
+                        viewport.x() + Geometry.PADDLE_WIDTH,  Geometry.PADDLE_HEIGHT, 0.0f,  // top right
+                        viewport.x() + Geometry.PADDLE_WIDTH, -Geometry.PADDLE_HEIGHT, 0.0f,  // bottom right
+                        viewport.z()                        , -Geometry.PADDLE_HEIGHT, 0.0f,  // bottom left
+                        viewport.z()                        ,  Geometry.PADDLE_HEIGHT, 0.0f   // top left
                 },
                 new BufferLayout(ShaderDataType.FLOAT3, "iPosition"));
         return true;
@@ -66,10 +66,10 @@ public class GameScene extends Scene {
         //noinspection ConstantConditions
         right.getComponent(MeshComponent.class).array.addVertex(
                 new float[]{
-                        viewport.y() - 0.06f,  2f, 0.0f,  // top right
-                        viewport.y() - 0.06f, -2f, 0.0f,  // bottom right
-                        viewport.w() - 0.01f, -2f, 0.0f,  // bottom left
-                        viewport.w() - 0.01f,  2f, 0.0f   // top left
+                        viewport.y() - Geometry.PADDLE_WIDTH,  Geometry.PADDLE_HEIGHT, 0.0f,  // top right
+                        viewport.y() - Geometry.PADDLE_WIDTH, -Geometry.PADDLE_HEIGHT, 0.0f,  // bottom right
+                        viewport.w()                        , -Geometry.PADDLE_HEIGHT, 0.0f,  // bottom left
+                        viewport.w()                        ,  Geometry.PADDLE_HEIGHT, 0.0f   // top left
                 },
                 new BufferLayout(ShaderDataType.FLOAT3, "iPosition"));
         return true;
@@ -87,11 +87,16 @@ public class GameScene extends Scene {
         final var behaviour = player.addBehaviour(PaddleController.class);
         behaviour.up = up;
         behaviour.down = down;
+        behaviour.viewport = camera.getViewport();
 
         return true;
     }
 
     private boolean initializeBall(Layer world, Vector4fc viewport, Shader shader) {
+        final var ball = world.newActor("BALL");
+        final var velocity = ball.addComponent(VelocityComponent.class);
+        velocity.velocity = 1.0f;
+//        final var mesh = ball.addComponent(MeshComponent.class);
         return true;
     }
 }

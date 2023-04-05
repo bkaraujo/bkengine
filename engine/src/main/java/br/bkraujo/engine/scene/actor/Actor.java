@@ -3,12 +3,12 @@ package br.bkraujo.engine.scene.actor;
 import br.bkraujo.engine.Lifecycle;
 import br.bkraujo.engine.event.Event;
 import br.bkraujo.engine.event.OnEvent;
+import br.bkraujo.engine.graphics.MeshComponent;
+import br.bkraujo.engine.graphics.TransformComponent;
 import br.bkraujo.engine.renderer.OnGui;
 import br.bkraujo.engine.renderer.OnRender;
 import br.bkraujo.engine.renderer.Renderer;
 import br.bkraujo.engine.scene.OnUpdate;
-import br.bkraujo.engine.scene.actor.component.MeshComponent;
-import br.bkraujo.engine.scene.actor.component.TransformComponent;
 import br.bkraujo.utils.Matrices;
 import br.bkraujo.utils.Reflections;
 
