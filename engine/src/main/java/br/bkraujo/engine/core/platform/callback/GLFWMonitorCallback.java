@@ -16,6 +16,9 @@ public final class GLFWMonitorCallback implements GLFWMonitorCallbackI {
         }
 
         if (found != -1) Platform.monitors.remove(found);
-        Platform.monitors.add(new Monitor(monitor));
+
+        final var candidate = new Monitor(monitor);
+        if (!candidate.initialize()) return;
+        Platform.monitors.add(candidate);
     }
 }

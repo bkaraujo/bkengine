@@ -94,7 +94,10 @@ public class GLFWWindow implements br.bkraujo.engine.platform.Window {
         glfwSetWindowCloseCallback(Platform.Window.handle, new GLFWWindowCloseCallback());
 
         // Other callbacks
-        glfwSetMonitorCallback(new GLFWMonitorCallback());
+        final var callback = new GLFWMonitorCallback();
+        callback.invoke(glfwGetPrimaryMonitor(), GLFW_DONT_CARE);
+
+        glfwSetMonitorCallback(callback);
         glfwSetFramebufferSizeCallback(Platform.Window.handle, new GLFWFramebufferSizeCallback());
     }
 

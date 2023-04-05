@@ -37,6 +37,7 @@ public final class ImGuiLayer extends AbstractLayer {
         viewport.updateGamepads();
         viewport.updateDeltaTime();
         viewport.updateMouseCursor();
+        viewport.updateMonitors();
 
         ImGui.newFrame();
     }

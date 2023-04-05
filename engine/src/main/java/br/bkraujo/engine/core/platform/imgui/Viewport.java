@@ -39,6 +39,8 @@ public final class Viewport implements Lifecycle, OnEvent {
         io.setBackendPlatformName(getClass().getCanonicalName());
         io.addBackendFlags(ImGuiBackendFlags.HasMouseCursors | ImGuiBackendFlags.HasSetMousePos | ImGuiBackendFlags.PlatformHasViewports);
 
+        io.setConfigFlags(ImGuiConfigFlags.ViewportsEnable | ImGuiConfigFlags.DockingEnable);
+
         io.setDisplaySize(Platform.Window.size.x, Platform.Window.size.y);
         io.setDisplayFramebufferScale(Platform.Window.framebuffer.x / (float) Platform.Window.size.x, Platform.Window.framebuffer.y / (float) Platform.Window.size.y);
 
@@ -127,81 +129,84 @@ public final class Viewport implements Lifecycle, OnEvent {
     }
 
     public void onEvent(Event event) {
-        if (event.is(MouseEvent.class)) {
-            if (event.is(MouseMovedEvent.class)) {
-                final var position = ((MouseMovedEvent) event).getPosition();
-                final var hasViewport = io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable);
+        if (event.is(MouseEvent.class)) { onMouseEvent((MouseEvent) event); return; }
+        if (event.is(KeyboardEvent.class)) { onKeyboardEvent((KeyboardEvent) event); return; }
+        if (event.is(WindowEvent.class)) onWindowEvent((WindowEvent) event);
+    }
 
-                io.setMousePos(position.x() + (hasViewport ? Platform.Window.position.x : 0), position.y() + (hasViewport ? Platform.Window.position.y : 0));
-                return;
-            }
+    private void onMouseEvent(MouseEvent event) {
+        if (glfwGetInputMode(Platform.Window.handle, GLFW_CURSOR) == GLFW_CURSOR_DISABLED) return;
 
-            if (event.is(MouseButtonEvent.class)) {
-                final var button = ((MouseButtonEvent) event).getButton();
-                if (button > ImGuiMouseButton.COUNT) return;
-                io.setMouseDown(button, event.is(MousePressedEvent.class));
-                event.setHandled();
-                return;
-            }
+        if (event.is(MouseMovedEvent.class)) {
+            final var position = ((MouseMovedEvent) event).getPosition();
+            final var hasViewport = io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable);
 
-            if (event.is(MouseScrollEvent.class)) {
-                final var offset = ((MouseScrollEvent) event).getOffset();
-                io.setMouseWheelH(io.getMouseWheelH() + (float) offset.x());
-                io.setMouseWheel(io.getMouseWheel() + (float) offset.y());
-                event.setHandled();
-                return;
-            }
+            io.setMousePos(position.x() + (hasViewport ? Platform.Window.position.x : 0), position.y() + (hasViewport ? Platform.Window.position.y : 0));
+            return;
         }
 
-        if (event.is(KeyboardEvent.class)) {
-            io.setKeyCtrl(Platform.Keyboard.isActive(GLFW_KEY_LEFT_CONTROL) || Platform.Keyboard.isActive(GLFW_KEY_RIGHT_CONTROL));
-            io.setKeyShift(Platform.Keyboard.isActive(GLFW_KEY_LEFT_SHIFT) || Platform.Keyboard.isActive(GLFW_KEY_RIGHT_SHIFT));
-            io.setKeyAlt(Platform.Keyboard.isActive(GLFW_KEY_LEFT_ALT) || Platform.Keyboard.isActive(GLFW_KEY_RIGHT_ALT));
-            io.setKeySuper(Platform.Keyboard.isActive(GLFW_KEY_LEFT_SUPER) || Platform.Keyboard.isActive(GLFW_KEY_RIGHT_SUPER));
-
-            final var key = ((KeyboardEvent) event).getKey();
-
-            if (event.is(KeyTypedEvent.class)) {
-                io.addInputCharacter(key);
-                event.setHandled();
-                return;
-            }
-
-            io.setKeysDown(key, event.is(KeyPressedEvent.class));
+        if (event.is(MouseButtonEvent.class)) {
+            final var button = ((MouseButtonEvent) event).getButton();
+            if (button > ImGuiMouseButton.COUNT) return;
+            io.setMouseDown(button, event.is(MousePressedEvent.class));
             event.setHandled();
             return;
         }
 
-        if (event.is(WindowEvent.class)) {
-            if (event.is(WindowFocusEvent.class)) {
-                io.addFocusEvent(event.is(WindowFocusGainedEvent.class));
-                return;
-            }
+        if (event.is(MouseScrollEvent.class)) {
+            final var offset = ((MouseScrollEvent) event).getOffset();
+            io.setMouseWheelH(io.getMouseWheelH() + (float) offset.x());
+            io.setMouseWheel(io.getMouseWheel() + (float) offset.y());
+            event.setHandled();
+        }
+    }
 
-            final var viewport = ImGui.findViewportByPlatformHandle(event.getWindow());
-            if (event.is(WindowCloseEvent.class)) {
-                viewport.setPlatformRequestClose(true);
-                return;
-            }
+    private void onKeyboardEvent(KeyboardEvent event) {
+        io.setKeyCtrl(Platform.Keyboard.isActive(GLFW_KEY_LEFT_CONTROL) || Platform.Keyboard.isActive(GLFW_KEY_RIGHT_CONTROL));
+        io.setKeyShift(Platform.Keyboard.isActive(GLFW_KEY_LEFT_SHIFT) || Platform.Keyboard.isActive(GLFW_KEY_RIGHT_SHIFT));
+        io.setKeyAlt(Platform.Keyboard.isActive(GLFW_KEY_LEFT_ALT) || Platform.Keyboard.isActive(GLFW_KEY_RIGHT_ALT));
+        io.setKeySuper(Platform.Keyboard.isActive(GLFW_KEY_LEFT_SUPER) || Platform.Keyboard.isActive(GLFW_KEY_RIGHT_SUPER));
 
-            if (event.is(WindowPositionEvent.class)) {
-                viewport.setPlatformRequestMove(true);
-                return;
-            }
+        final var key = event.getKey();
+        if (event.is(KeyTypedEvent.class)) {
+            io.addInputCharacter(key);
+            event.setHandled();
+            return;
+        }
 
-            if (event.is(WindowSizeEvent.class)) {
-                final var size = ((WindowSizeEvent) event).getSize();
-                io.setDisplaySize(size.x(), size.y());
-                viewport.setPlatformRequestResize(true);
-                return;
-            }
+        io.setKeysDown(key, event.is(KeyPressedEvent.class));
+        event.setHandled();
+    }
 
-            if (event.is(WindowFramebufferSizeEvent.class)) {
-                io.setDisplayFramebufferScale(
-                        Platform.Window.framebuffer.x / (float) Platform.Window.size.x,
-                        Platform.Window.framebuffer.y / (float) Platform.Window.size.y
-                );
-            }
+    private void onWindowEvent(WindowEvent event) {
+        if (event.is(WindowFocusEvent.class)) {
+            io.addFocusEvent(event.is(WindowFocusGainedEvent.class));
+            return;
+        }
+
+        final var viewport = ImGui.findViewportByPlatformHandle(event.getWindow());
+        if (event.is(WindowCloseEvent.class)) {
+            viewport.setPlatformRequestClose(true);
+            return;
+        }
+
+        if (event.is(WindowPositionEvent.class)) {
+            viewport.setPlatformRequestMove(true);
+            return;
+        }
+
+        if (event.is(WindowSizeEvent.class)) {
+            final var size = ((WindowSizeEvent) event).getSize();
+            io.setDisplaySize(size.x(), size.y());
+            viewport.setPlatformRequestResize(true);
+            return;
+        }
+
+        if (event.is(WindowFramebufferSizeEvent.class)) {
+            io.setDisplayFramebufferScale(
+                    Platform.Window.framebuffer.x / (float) Platform.Window.size.x,
+                    Platform.Window.framebuffer.y / (float) Platform.Window.size.y
+            );
         }
     }
 
@@ -288,5 +293,23 @@ public final class Viewport implements Lifecycle, OnEvent {
     public void terminate() {
         for (int i = 0; i < ImGuiMouseCursor.COUNT; i++)
             glfwDestroyCursor(mouseCursors[i]);
+    }
+
+    private int monitors = 0;
+    public void updateMonitors() {
+        if (Platform.monitors.size() == monitors) return;
+        monitors = Platform.monitors.size();
+
+        platform.resizeMonitors(0);
+        for (var monitor : Platform.monitors) {
+            final var position = monitor.getPosition();
+            final var size = monitor.getSize();
+            final var scale = monitor.getScale();
+            platform.pushMonitors(
+                    position.x, position.y, size.x, size.y,
+                    position.x, position.y, size.x, size.y,
+                    scale.x
+            );
+        }
     }
 }
