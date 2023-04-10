@@ -9,7 +9,7 @@ import static org.lwjgl.glfw.GLFW.glfwFocusWindow;
 public final class ViewportSetWindowFocusFunction extends ImPlatformFuncViewport {
 
     public void accept(final ImGuiViewport vp) {
-        if (!GLFWUtils.hasFocusWindow()) return;
+        if (!GLFWUtils.hasFocusWindow) return;
 
         final ViewportData data = (ViewportData) vp.getPlatformUserData();
         glfwFocusWindow(data.window);

@@ -40,7 +40,7 @@ public final class Monitor implements Lifecycle {
 
         size.set(vidMode.width(), vidMode.height());
 
-        if (GLFWUtils.hasMonitorWorkArea()) {
+        if (GLFWUtils.hasMonitorWorkArea) {
             try (var stack = MemoryStack.stackPush()) {
                 final var xPtr = stack.mallocInt(1);
                 final var yPtr = stack.mallocInt(1);
@@ -52,7 +52,7 @@ public final class Monitor implements Lifecycle {
         }
 
         // Workaround a small GLFW issue reporting zero on monitor changes: https://github.com/glfw/glfw/pull/1761
-        if (GLFWUtils.hasMonitorWorkArea() && workArea.z > 0 && workArea.w > 0) {
+        if (GLFWUtils.hasMonitorWorkArea && workArea.z > 0 && workArea.w > 0) {
             position.x = workArea.x;
             position.y = workArea.y;
             size.x = workArea.z;
@@ -61,7 +61,7 @@ public final class Monitor implements Lifecycle {
 
         // Warning: the validity of monitor DPI information on Windows depends on the application DPI awareness settings,
         // which generally needs to be set in the manifest or at runtime.
-        if (GLFWUtils.hasPerMonitorDpi()) {
+        if (GLFWUtils.hasPerMonitorDpi) {
             try (var stack = MemoryStack.stackPush()) {
                 final var xPtr = stack.mallocFloat(1);
                 final var yPtr = stack.mallocFloat(1);

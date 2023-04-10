@@ -1,67 +1,58 @@
 package br.bkraujo.engine.core.platform;
 
-import org.joml.Vector3i;
 import org.lwjgl.system.MemoryStack;
 
 import static org.lwjgl.glfw.GLFW.glfwGetVersion;
 
 public abstract class GLFWUtils {
-    private GLFWUtils(){}
+    private GLFWUtils() {
+    }
 
-    private static final Vector3i version = new Vector3i();
-    private static void readVersion() {
-        try (var stack = MemoryStack.stackPush()){
+    /** 3.2+ GLFW_FLOATING */
+    public static final boolean hasWindowTopmost;
+    /** 3.2+ glfwFocusWindow */
+    public static final boolean hasFocusWindow;
+
+    /** 3.3+ GLFW_HOVERED */
+    public static final boolean hasWindowHovered;
+    /** 3.3+ glfwSetWindowOpacity */
+    public static final boolean hasWindowAlpha;
+    /** 3.3+ glfwGetMonitorContentScale */
+    public static final boolean hasPerMonitorDpi;
+    /** 3.3+ GLFW_FOCUS_ON_SHOW */
+    public static final boolean hasFocusOnShow;
+    /** 3.3+ glfwGetMonitorWorkarea */
+    public static final boolean hasMonitorWorkArea;
+    /** 3.3.1+ Fixed: Resizing window repositions it on MacOS #1553 */
+    public static final boolean hasOsxWindowPosFix;
+
+    /** 3.4+ GLFW_RESIZE_ALL_CURSOR, GLFW_RESIZE_NESW_CURSOR, GLFW_RESIZE_NWSE_CURSOR, GLFW_NOT_ALLOWED_CURSOR */
+    public static final boolean hasNewCursors;
+    /** 3.4+ GLFW_MOUSE_PASSTHROUGH */
+    public static final boolean hasMousePassThrough;
+
+    static {
+        int version;
+        try (var stack = MemoryStack.stackPush()) {
             final var major = stack.mallocInt(1);
             final var minor = stack.mallocInt(1);
             final var rev = stack.mallocInt(1);
 
             glfwGetVersion(major, minor, rev);
-            version.x = major.get();
-            version.y = minor.get();
-            version.z = rev.get();
+            version = major.get() * 1000 + minor.get() * 100 + rev.get() * 10;
         }
+
+        hasWindowTopmost = version >= 3200;
+        hasFocusWindow = version >= 3200;
+
+        hasWindowHovered = version >= 3300;
+        hasWindowAlpha = version >= 3300;
+        hasPerMonitorDpi = version >= 3300;
+        hasFocusOnShow = version >= 3300;
+        hasMonitorWorkArea = version >= 3300;
+        hasOsxWindowPosFix = version >= 3310;
+
+        hasNewCursors = version >= 3400;
+        hasMousePassThrough = version >= 3400;
     }
-
-    public static boolean hasFocusWindow() {
-        if (version.x == 0) readVersion();
-        if (version.x != 3) return false;
-
-        return version.y >= 2;
-    }
-
-    public static boolean hasWindowTopmost() {
-        if (version.x == 0) readVersion();
-        if (version.x != 3) return false;
-
-        return version.y >= 2;
-    }
-
-    public static boolean hasMonitorWorkArea() {
-        if (version.x == 0) readVersion();
-        if (version.x != 3) return false;
-
-        return version.y >= 3;
-    }
-
-    public static boolean hasFocusOnShow() {
-        if (version.x == 0) readVersion();
-        if (version.x != 3) return false;
-
-        return version.y >= 3;
-    }
-
-    public static boolean hasPerMonitorDpi() {
-        if (version.x == 0) readVersion();
-        if (version.x != 3) return false;
-
-        return version.y >= 3;
-    }
-
-    public static boolean hasWindowAlpha() {
-        if (version.x == 0) readVersion();
-        if (version.x != 3) return false;
-
-        return version.y >= 3;
-    }
-
 }

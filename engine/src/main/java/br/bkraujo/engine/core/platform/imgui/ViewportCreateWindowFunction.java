@@ -20,11 +20,11 @@ public class ViewportCreateWindowFunction extends ImPlatformFuncViewport {
         // With GLFW 3.3, the hint GLFW_FOCUS_ON_SHOW fixes this problem
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_FOCUSED, GLFW_FALSE);
-        if (GLFWUtils.hasFocusOnShow()) {
+        if (GLFWUtils.hasFocusOnShow) {
             glfwWindowHint(GLFW_FOCUS_ON_SHOW, GLFW_FALSE);
         }
         glfwWindowHint(GLFW_DECORATED, vp.hasFlags(ImGuiViewportFlags.NoDecoration) ? GLFW_FALSE : GLFW_TRUE);
-        if (GLFWUtils.hasWindowTopmost()) {
+        if (GLFWUtils.hasWindowTopmost) {
             glfwWindowHint(GLFW_FLOATING, vp.hasFlags(ImGuiViewportFlags.TopMost) ? GLFW_TRUE : GLFW_FALSE);
         }
 

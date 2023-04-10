@@ -9,7 +9,7 @@ import static org.lwjgl.glfw.GLFW.glfwSetWindowOpacity;
 public class ViewportSetWindowAlphaFunction extends ImPlatformFuncViewportFloat {
 
     public void accept(final ImGuiViewport vp, final float f) {
-        if (!GLFWUtils.hasWindowAlpha()) return;
+        if (!GLFWUtils.hasWindowAlpha) return;
 
         final ViewportData data = (ViewportData) vp.getPlatformUserData();
         glfwSetWindowOpacity(data.window, f);

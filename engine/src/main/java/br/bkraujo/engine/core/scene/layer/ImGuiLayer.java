@@ -40,7 +40,6 @@ public final class ImGuiLayer extends AbstractLayer {
     }
 
     protected void doBeforeGui() {
-        viewport.updateGamepads();
         viewport.updateDeltaTime();
         viewport.updateMouseCursor();
         viewport.updateMonitors();

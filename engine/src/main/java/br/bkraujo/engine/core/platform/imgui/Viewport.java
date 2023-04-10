@@ -1,6 +1,7 @@
 package br.bkraujo.engine.core.platform.imgui;
 
 import br.bkraujo.engine.Lifecycle;
+import br.bkraujo.engine.core.platform.GLFWUtils;
 import br.bkraujo.engine.core.platform.Platform;
 import br.bkraujo.engine.core.platform.event.*;
 import br.bkraujo.engine.event.Event;
@@ -11,22 +12,15 @@ import imgui.ImGuiPlatformIO;
 import imgui.callback.ImStrConsumer;
 import imgui.callback.ImStrSupplier;
 import imgui.flag.*;
-import org.lwjgl.glfw.GLFWNativeWin32;
-
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFWNativeWin32.glfwGetWin32Window;
 
 public final class Viewport implements Lifecycle, OnEvent {
     private final ImGuiIO io;
     private final ImGuiPlatformIO platform;
 
-    // Mouse cursors provided by GLFW
     private final long[] mouseCursors = new long[ImGuiMouseCursor.COUNT];
-
-    // Empty array to fill ImGuiIO.NavInputs with zeroes
-    private final float[] navInputs = new float[ImGuiNavInput.COUNT];
 
     private double time = 0.0;
 
@@ -37,13 +31,36 @@ public final class Viewport implements Lifecycle, OnEvent {
 
     public boolean initialize() {
         io.setBackendPlatformName(getClass().getCanonicalName());
-        io.addBackendFlags(ImGuiBackendFlags.HasMouseCursors | ImGuiBackendFlags.HasSetMousePos | ImGuiBackendFlags.PlatformHasViewports);
-
         io.setConfigFlags(ImGuiConfigFlags.ViewportsEnable | ImGuiConfigFlags.DockingEnable);
+        io.addBackendFlags(
+                // We can honor GetMouseCursor() values (optional)
+                ImGuiBackendFlags.HasMouseCursors |
+                        // We can honor io.WantSetMousePos requests (optional, rarely used)
+                        ImGuiBackendFlags.HasSetMousePos |
+                        // We can create multi-viewports on the Platform side (optional)
+                        ImGuiBackendFlags.PlatformHasViewports |
+                        // We can set io.MouseHoveredViewport correctly (optional, not easy)
+                        (GLFWUtils.hasMousePassThrough ? ImGuiBackendFlags.HasMouseHoveredViewport : ImGuiBackendFlags.None)
+        );
 
+        initializeDisplay();
+        initializeKeyboardMapping();
+        initializeClipBoard();
+        initializeCursors();
+        initializeViewport();
+
+        return true;
+    }
+
+    private void initializeDisplay() {
         io.setDisplaySize(Platform.Window.size.x, Platform.Window.size.y);
-        io.setDisplayFramebufferScale(Platform.Window.framebuffer.x / (float) Platform.Window.size.x, Platform.Window.framebuffer.y / (float) Platform.Window.size.y);
+        io.setDisplayFramebufferScale(
+                Platform.Window.framebuffer.x / (float) Platform.Window.size.x,
+                Platform.Window.framebuffer.y / (float) Platform.Window.size.y
+        );
+    }
 
+    private void initializeKeyboardMapping() {
         // Keyboard mapping. ImGui will use those indices to peek into the io.KeysDown[] array.
         final int[] keyMap = new int[ImGuiKey.COUNT];
         keyMap[ImGuiKey.Tab] = GLFW_KEY_TAB;
@@ -70,7 +87,9 @@ public final class Viewport implements Lifecycle, OnEvent {
         keyMap[ImGuiKey.Z] = GLFW_KEY_Z;
 
         io.setKeyMap(keyMap);
+    }
 
+    private void initializeClipBoard() {
         io.setGetClipboardTextFn(new ImStrSupplier() {
             @Override
             public String get() {
@@ -85,26 +104,37 @@ public final class Viewport implements Lifecycle, OnEvent {
                 glfwSetClipboardString(Platform.Window.handle, str);
             }
         });
+    }
 
+    private void initializeCursors() {
         // Mouse cursors mapping. Disable errors whilst setting due to X11.
         final var prevErrorCallback = glfwSetErrorCallback(null);
         mouseCursors[ImGuiMouseCursor.Arrow] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
         mouseCursors[ImGuiMouseCursor.TextInput] = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
-        mouseCursors[ImGuiMouseCursor.ResizeAll] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
         mouseCursors[ImGuiMouseCursor.ResizeNS] = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
         mouseCursors[ImGuiMouseCursor.ResizeEW] = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
-        mouseCursors[ImGuiMouseCursor.ResizeNESW] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
-        mouseCursors[ImGuiMouseCursor.ResizeNWSE] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
         mouseCursors[ImGuiMouseCursor.Hand] = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
-        mouseCursors[ImGuiMouseCursor.NotAllowed] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+        if (GLFWUtils.hasNewCursors) {
+            mouseCursors[ImGuiMouseCursor.ResizeAll] = glfwCreateStandardCursor(GLFW_RESIZE_ALL_CURSOR);
+            mouseCursors[ImGuiMouseCursor.ResizeNESW] = glfwCreateStandardCursor(GLFW_RESIZE_NESW_CURSOR);
+            mouseCursors[ImGuiMouseCursor.ResizeNWSE] = glfwCreateStandardCursor(GLFW_RESIZE_NWSE_CURSOR);
+            mouseCursors[ImGuiMouseCursor.NotAllowed] = glfwCreateStandardCursor(GLFW_NOT_ALLOWED_CURSOR);
+        } else {
+            mouseCursors[ImGuiMouseCursor.ResizeAll] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+            mouseCursors[ImGuiMouseCursor.ResizeNESW] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+            mouseCursors[ImGuiMouseCursor.ResizeNWSE] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+            mouseCursors[ImGuiMouseCursor.NotAllowed] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+        }
         glfwSetErrorCallback(prevErrorCallback);
+    }
 
+    private void initializeViewport() {
         // Our mouse update function expect PlatformHandle to be filled for the main viewport
         final var viewport = ImGui.getMainViewport();
         viewport.setPlatformHandle(Platform.Window.handle);
 
         if (Platform.IS_WINDOWS) {
-            viewport.setPlatformHandleRaw(GLFWNativeWin32.glfwGetWin32Window(Platform.Window.handle));
+            viewport.setPlatformHandleRaw(glfwGetWin32Window(Platform.Window.handle));
         }
 
         if (io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
@@ -124,8 +154,6 @@ public final class Viewport implements Lifecycle, OnEvent {
             platform.setPlatformRenderWindow(new ViewportRenderWindowFunction());
             platform.setPlatformSwapBuffers(new ViewportSwapBuffersFunction());
         }
-
-        return true;
     }
 
     public void onEvent(Event event) {
@@ -239,55 +267,6 @@ public final class Viewport implements Lifecycle, OnEvent {
                 glfwSetInputMode(windowPtr, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             }
         }
-    }
-
-    public void updateGamepads() {
-        if (!io.hasConfigFlags(ImGuiConfigFlags.NavEnableGamepad))
-            return;
-
-        io.setNavInputs(navInputs);
-
-        final var buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1);
-        if (buttons == null) return;
-        final var buttonsCount = buttons.limit();
-
-        final var axis = glfwGetJoystickAxes(GLFW_JOYSTICK_1);
-        if (axis == null) return;
-        final var axisCount = axis.limit();
-
-        mapButton(ImGuiNavInput.Activate, 0, buttons, buttonsCount);   // Cross / A
-        mapButton(ImGuiNavInput.Cancel, 1, buttons, buttonsCount);     // Circle / B
-        mapButton(ImGuiNavInput.Menu, 2, buttons, buttonsCount);       // Square / X
-        mapButton(ImGuiNavInput.Input, 3, buttons, buttonsCount);      // Triangle / Y
-        mapButton(ImGuiNavInput.DpadLeft, 13, buttons, buttonsCount);  // D-Pad Left
-        mapButton(ImGuiNavInput.DpadRight, 11, buttons, buttonsCount); // D-Pad Right
-        mapButton(ImGuiNavInput.DpadUp, 10, buttons, buttonsCount);    // D-Pad Up
-        mapButton(ImGuiNavInput.DpadDown, 12, buttons, buttonsCount);  // D-Pad Down
-        mapButton(ImGuiNavInput.FocusPrev, 4, buttons, buttonsCount);  // L1 / LB
-        mapButton(ImGuiNavInput.FocusNext, 5, buttons, buttonsCount);  // R1 / RB
-        mapButton(ImGuiNavInput.TweakSlow, 4, buttons, buttonsCount);  // L1 / LB
-        mapButton(ImGuiNavInput.TweakFast, 5, buttons, buttonsCount);  // R1 / RB
-
-        mapAnalog(ImGuiNavInput.LStickLeft, 0, -0.3f, -0.9f, axis, axisCount);
-        mapAnalog(ImGuiNavInput.LStickRight, 0, +0.3f, +0.9f, axis, axisCount);
-        mapAnalog(ImGuiNavInput.LStickUp, 1, +0.3f, +0.9f, axis, axisCount);
-        mapAnalog(ImGuiNavInput.LStickDown, 1, -0.3f, -0.9f, axis, axisCount);
-
-        if (axisCount > 0 && buttonsCount > 0)  io.addBackendFlags(ImGuiBackendFlags.HasGamepad);
-        else                                    io.removeBackendFlags(ImGuiBackendFlags.HasGamepad);
-    }
-
-    private void mapButton(final int navNo, final int buttonNo, final ByteBuffer buttons, final int buttonsCount) {
-        if (buttonsCount > buttonNo && buttons.get(buttonNo) == GLFW_PRESS)
-            io.setNavInputs(navNo, 1.0f);
-    }
-
-    private void mapAnalog(final int navNo, final int axisNo, final float v0, final float v1, final FloatBuffer axis, final int axisCount) {
-        var v = axisCount > axisNo ? axis.get(axisNo) : v0;
-        v = (v - v0) / (v1 - v0);
-
-        if (v > 1.0f) v = 1.0f;
-        if (io.getNavInputs(navNo) < v) io.setNavInputs(navNo, v);
     }
 
     public void terminate() {
