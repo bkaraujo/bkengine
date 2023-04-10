@@ -18,12 +18,11 @@ public final class Application implements Lifecycle {
     private static Scene scene;
     private static Game game;
 
-
     public static int fps = 0;
     public static int ups = 0;
     public static float frameTime = Float.MIN_VALUE;
 
-    public static long tick = 0;
+    public static long frameCount;
 
     public static void setShouldStop() { running = false; }
 
@@ -50,11 +49,11 @@ public final class Application implements Lifecycle {
 
     public Application(Class<? extends Game> klass) {
         game = Reflections.instantiate(klass);
-        if (game == null) Logger.fatal("Failed to create game instance");
+        if (game == null) fatal("Failed to create game instance");
     }
 
     public boolean initialize() {
-        Logger.info("Initializing Application");
+        debug("Initializing Application");
 
         if (!initializePlatform()) return false;
         if (!initializeGraphicsEngine()) return false;
@@ -62,6 +61,7 @@ public final class Application implements Lifecycle {
     }
 
     private boolean initializePlatform() {
+        debug("Initializing Platform");
         platform = new Platform();
         if (!platform.initialize()) return false;
 
@@ -70,6 +70,7 @@ public final class Application implements Lifecycle {
     }
 
     private boolean initializeGraphicsEngine() {
+        debug("Initializing Graphics Engine");
         final var graphicsConfiguration = game.getGraphicsConfiguration();
 
         graphics = Graphics.create(graphicsConfiguration.getGraphicsApi());
@@ -78,6 +79,7 @@ public final class Application implements Lifecycle {
     }
 
     private boolean initializeGame() {
+        debug("Initializing Game");
         if (!game.initialize()) { error("Game failed to initialize"); return false; }
 
         scene = Reflections.instantiate(game.getScene());
@@ -99,13 +101,12 @@ public final class Application implements Lifecycle {
         long timer = Time.millis();
 
         window.show();
-        info("Starting Game Loop");
+        debug("Starting Game Loop");
         while(running) {
             if (Platform.Window.maximized) { platform.pollEvents(); continue; }
-            tick++;
 
             final var now = Time.nanos();
-            final var delta = (now - lastTime);
+            final var delta = now - lastTime;
             lastTime += delta;
 
             accumulator += delta;
@@ -121,6 +122,7 @@ public final class Application implements Lifecycle {
             graphics.swap();
 
             fps++;
+            frameCount++;
 
             final var current = Time.millis();
             if (current - timer > Time.SECOND) {
@@ -131,7 +133,7 @@ public final class Application implements Lifecycle {
                 ups = fps = 0;
             }
 
-             Application.frameTime = (Time.nanos() - now) / Time.MILLISECOND;
+            Application.frameTime = (Time.nanos() - now) / Time.MILLISECOND;
             platform.pollEvents();
         }
 
@@ -139,7 +141,9 @@ public final class Application implements Lifecycle {
     }
 
     public void terminate() {
-        Logger.info("Terminating Application");
+        debug("Terminating Application");
+
+        if (scene != null) scene.terminate();
         if (window != null) window.terminate();
         if (platform != null) platform.terminate();
     }

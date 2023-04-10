@@ -3,18 +3,19 @@ package br.bkraujo.engine.core.scene.layer;
 import br.bkraujo.engine.event.Event;
 import br.bkraujo.engine.scene.actor.Actor;
 import br.bkraujo.engine.scene.layer.Layer;
-import br.bkraujo.engine.scene.layer.LayerType;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static br.bkraujo.engine.Logger.trace;
 import static br.bkraujo.engine.Logger.warn;
 
-public class AbstractLayer implements Layer {
+public abstract class AbstractLayer implements Layer {
     protected final List<Actor> actors = new ArrayList<>();
 
     protected boolean doInitialize() { return true; }
     public boolean initialize() {
+        trace("Initializing layer %s", getName());
         for (var actor : actors)
             if (!actor.initialize())
                 return false;
@@ -24,13 +25,10 @@ public class AbstractLayer implements Layer {
 
     protected void doTerminate() {}
     public final void terminate() {
+        trace("Terminating layer %s", getName());
         doTerminate();
         for(var actor : actors)
             actor.terminate();
-    }
-
-    public LayerType getType() {
-        return null;
     }
 
     public Actor newActor() {

@@ -13,8 +13,8 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
 
-import static br.bkraujo.engine.Logger.debug;
 import static br.bkraujo.engine.Logger.error;
+import static br.bkraujo.engine.Logger.trace;
 import static org.lwjgl.glfw.GLFW.*;
 
 public final class Platform implements Lifecycle {
@@ -24,7 +24,7 @@ public final class Platform implements Lifecycle {
 
     public static final List<Monitor> monitors = new ArrayList<>();
     public boolean initialize() {
-        debug("Initializing Platform");
+        trace("Initializing Platform");
         if (!GLFW.glfwInit()) { error("GLFW failed to initialize"); return false; }
 
         return true;
@@ -40,7 +40,7 @@ public final class Platform implements Lifecycle {
     }
 
     public void terminate() {
-        debug("Terminating Platform");
+        trace("Terminating Platform");
 
         final var cbk = glfwSetErrorCallback(null);
         if (cbk != null) cbk.free();

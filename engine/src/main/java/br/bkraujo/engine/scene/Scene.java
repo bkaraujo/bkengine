@@ -12,6 +12,8 @@ import br.bkraujo.engine.scene.camera.Camera;
 import br.bkraujo.engine.scene.layer.Layer;
 import br.bkraujo.engine.scene.layer.LayerType;
 
+import static br.bkraujo.engine.Logger.debug;
+
 public abstract class Scene implements Lifecycle, OnUpdate, OnEvent, OnRender, OnGui {
     private final Layer world = new WorldLayer();
     private final Layer gui = new ImGuiLayer();
@@ -26,6 +28,7 @@ public abstract class Scene implements Lifecycle, OnUpdate, OnEvent, OnRender, O
     /** Initialize the scene details */
     protected boolean doInitialize() { return true; }
     public final boolean initialize() {
+        debug("Initializing Scene %s", getClass().getCanonicalName());
         if (!doInitialize()) return false;
         if (!world.initialize()) return false;
         return gui.initialize();
@@ -65,6 +68,7 @@ public abstract class Scene implements Lifecycle, OnUpdate, OnEvent, OnRender, O
     /** Terminate the scene details */
     protected void doTerminate() {}
     public void terminate() {
+        debug("Terminating Scene %s", getClass().getCanonicalName());
         gui.terminate();
         world.terminate();
         doTerminate();

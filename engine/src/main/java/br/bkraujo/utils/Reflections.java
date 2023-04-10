@@ -30,4 +30,8 @@ public abstract class Reflections {
             return null;
         }
     }
+
+    public static ClassLoader classLoader() {
+        return Thread.currentThread().getContextClassLoader();
+    }
 }

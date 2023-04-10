@@ -1,8 +1,10 @@
 package br.bkraujo.engine.core.scene.layer;
 
+import br.bkraujo.engine.core.platform.imgui.IMGUIUtils;
 import br.bkraujo.engine.core.platform.imgui.Viewport;
 import br.bkraujo.engine.core.renderer.imgui.Renderer;
 import br.bkraujo.engine.event.Event;
+import br.bkraujo.engine.scene.layer.LayerType;
 import imgui.ImGui;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.internal.ImGuiContext;
@@ -15,7 +17,11 @@ public final class ImGuiLayer extends AbstractLayer {
     private Viewport viewport;
     private Renderer renderer;
 
+    public LayerType getType() { return LayerType.UI; }
+
     protected boolean doInitialize() {
+        if (!IMGUIUtils.initialize()) return false;
+
         context = ImGui.createContext();
         ImGui.setCurrentContext(context);
 
@@ -58,5 +64,6 @@ public final class ImGuiLayer extends AbstractLayer {
         if (renderer!= null) renderer.terminate();
         if (viewport != null) viewport.terminate();
         if (context != null) ImGui.destroyContext(context);
+        IMGUIUtils.terminate();
     }
 }

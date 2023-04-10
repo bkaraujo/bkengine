@@ -7,7 +7,7 @@ import br.bkraujo.engine.graphics.GraphicsFactory;
 import br.bkraujo.utils.Reflections;
 import org.lwjgl.opengl.GL;
 
-import static br.bkraujo.engine.Logger.debug;
+import static br.bkraujo.engine.Logger.trace;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
@@ -16,8 +16,8 @@ public class GLContext implements GraphicsContext {
         glfwMakeContextCurrent(Platform.Window.handle);
         GL.createCapabilities();
 
-        debug("GL_RENDERER: %s", glGetString(GL_RENDERER));
-        debug("GL_VERSION: %s", glGetString(GL_VERSION));
+        trace("GL_RENDERER: %s", glGetString(GL_RENDERER));
+        trace("GL_VERSION: %s", glGetString(GL_VERSION));
 
         glfwSwapInterval(0);
         glClearColor(1f, 0, 1f, 1f);

@@ -9,5 +9,5 @@ public class GraphicsConfiguration {
     public GraphicsApi getGraphicsApi() { return GraphicsApi.OPENGL; }
 
     /** Opengl version to use. Called if {@link #getGraphicsApi()} return {@link GraphicsApi#OPENGL} */
-    public Vector2ic getGLVersion() { return Vectors.of(3, 3); }
+    public Vector2ic getGLVersion() { return Vectors.of(4, 6); }
 }
