@@ -6,16 +6,20 @@ import br.bkraujo.engine.scene.actor.Behaviour;
 import org.joml.Vector4fc;
 
 public class PaddleController extends Behaviour {
-
     public int up;
     public int down;
+
+    private float floor = 0f;
+    private float ceiling = 0f;
     public Vector4fc viewport;
     private VelocityComponent velocityComponent;
-    private float ceiling = 0f;
-    private float floor = 0f;
+
     public boolean initialize() {
+        if (viewport == null) return false;
+
         floor = viewport.z() + Geometry.PADDLE_HEIGHT;
         ceiling = viewport.w() - Geometry.PADDLE_HEIGHT;
+
         return (velocityComponent = getComponent(VelocityComponent.class)) != null;
     }
 
