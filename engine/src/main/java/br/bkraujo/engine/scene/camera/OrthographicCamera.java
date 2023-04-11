@@ -15,7 +15,7 @@ public final class OrthographicCamera extends AbstractCamera {
     }
 
     public OrthographicCamera(Vector4f area) {
-        final var ratio = Platform.Window.ratio;
+        final var ratio = Platform.window.get(Platform.Window.main).ratio;
 
         viewport = Vectors.of(area.x,
                 area.y,

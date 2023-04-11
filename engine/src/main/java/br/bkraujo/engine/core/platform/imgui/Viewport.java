@@ -1,9 +1,17 @@
 package br.bkraujo.engine.core.platform.imgui;
 
 import br.bkraujo.engine.Lifecycle;
-import br.bkraujo.engine.core.platform.GLFWUtils;
 import br.bkraujo.engine.core.platform.Platform;
-import br.bkraujo.engine.core.platform.event.*;
+import br.bkraujo.engine.core.platform.event.FramebufferEvent;
+import br.bkraujo.engine.core.platform.event.KeyboardEvent;
+import br.bkraujo.engine.core.platform.event.MouseEvent;
+import br.bkraujo.engine.core.platform.event.WindowEvent;
+import br.bkraujo.engine.core.platform.glfw.GLFWUtils;
+import br.bkraujo.engine.core.platform.imgui.event.FramebufferEventHandler;
+import br.bkraujo.engine.core.platform.imgui.event.KeyboardEventHandler;
+import br.bkraujo.engine.core.platform.imgui.event.MouseEventHandler;
+import br.bkraujo.engine.core.platform.imgui.event.WindowEventHandler;
+import br.bkraujo.engine.core.platform.imgui.functions.*;
 import br.bkraujo.engine.event.Event;
 import br.bkraujo.engine.event.OnEvent;
 import imgui.ImGui;
@@ -11,7 +19,10 @@ import imgui.ImGuiIO;
 import imgui.ImGuiPlatformIO;
 import imgui.callback.ImStrConsumer;
 import imgui.callback.ImStrSupplier;
-import imgui.flag.*;
+import imgui.flag.ImGuiBackendFlags;
+import imgui.flag.ImGuiConfigFlags;
+import imgui.flag.ImGuiKey;
+import imgui.flag.ImGuiMouseCursor;
 
 import static br.bkraujo.engine.Logger.trace;
 import static org.lwjgl.glfw.GLFW.*;
@@ -20,6 +31,10 @@ import static org.lwjgl.glfw.GLFWNativeWin32.glfwGetWin32Window;
 public final class Viewport implements Lifecycle, OnEvent {
     private final ImGuiIO io;
     private final ImGuiPlatformIO platform;
+    private final MouseEventHandler mouse;
+    private final WindowEventHandler window;
+    private final KeyboardEventHandler keyboard;
+    private final FramebufferEventHandler framebuffer;
 
     private final long[] mouseCursors = new long[ImGuiMouseCursor.COUNT];
 
@@ -28,6 +43,11 @@ public final class Viewport implements Lifecycle, OnEvent {
     public Viewport(ImGuiIO io, ImGuiPlatformIO platform) {
         this.io = io;
         this.platform = platform;
+
+        mouse = new MouseEventHandler(io, platform);
+        window = new WindowEventHandler(io, platform);
+        keyboard = new KeyboardEventHandler(io, platform);
+        framebuffer = new FramebufferEventHandler(io, platform);
     }
 
     public boolean initialize() {
@@ -45,21 +65,12 @@ public final class Viewport implements Lifecycle, OnEvent {
                         (GLFWUtils.hasMousePassThrough ? ImGuiBackendFlags.HasMouseHoveredViewport : ImGuiBackendFlags.None)
         );
 
-        initializeDisplay();
         initializeKeyboardMapping();
         initializeClipBoard();
         initializeCursors();
         initializeViewport();
 
         return true;
-    }
-
-    private void initializeDisplay() {
-        io.setDisplaySize(Platform.Window.size.x, Platform.Window.size.y);
-        io.setDisplayFramebufferScale(
-                Platform.Window.framebuffer.x / (float) Platform.Window.size.x,
-                Platform.Window.framebuffer.y / (float) Platform.Window.size.y
-        );
     }
 
     private void initializeKeyboardMapping() {
@@ -95,7 +106,7 @@ public final class Viewport implements Lifecycle, OnEvent {
         io.setGetClipboardTextFn(new ImStrSupplier() {
             @Override
             public String get() {
-                final String clipboardString = glfwGetClipboardString(Platform.Window.handle);
+                final String clipboardString = glfwGetClipboardString(Platform.Window.main);
                 return clipboardString != null ? clipboardString : "";
             }
         });
@@ -103,7 +114,7 @@ public final class Viewport implements Lifecycle, OnEvent {
         io.setSetClipboardTextFn(new ImStrConsumer() {
             @Override
             public void accept(final String str) {
-                glfwSetClipboardString(Platform.Window.handle, str);
+                glfwSetClipboardString(Platform.Window.main, str);
             }
         });
     }
@@ -133,14 +144,16 @@ public final class Viewport implements Lifecycle, OnEvent {
     private void initializeViewport() {
         // Our mouse update function expect PlatformHandle to be filled for the main viewport
         final var viewport = ImGui.getMainViewport();
-        viewport.setPlatformHandle(Platform.Window.handle);
+        viewport.setPlatformHandle(Platform.Window.main);
 
         if (Platform.IS_WINDOWS) {
-            viewport.setPlatformHandleRaw(glfwGetWin32Window(Platform.Window.handle));
+            viewport.setPlatformHandleRaw(glfwGetWin32Window(Platform.Window.main));
         }
 
         if (io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
             viewport.setPlatformUserData(new ViewportData());
+            ((ViewportData) viewport.getPlatformUserData()).window = Platform.Window.main;
+
             platform.setPlatformCreateWindow(new ViewportCreateWindowFunction());
             platform.setPlatformDestroyWindow(new ViewportDestroyWindowFunction());
             platform.setPlatformShowWindow(new ViewportShowWindowFunction());
@@ -158,86 +171,20 @@ public final class Viewport implements Lifecycle, OnEvent {
         }
     }
 
+    @Override
     public void onEvent(Event event) {
-        if (event.is(MouseEvent.class)) { onMouseEvent((MouseEvent) event); return; }
-        if (event.is(KeyboardEvent.class)) { onKeyboardEvent((KeyboardEvent) event); return; }
-        if (event.is(WindowEvent.class)) onWindowEvent((WindowEvent) event);
+        if (event.is(MouseEvent.class)) mouse.onEvent(event);
+        if (event.is(KeyboardEvent.class)) keyboard.onEvent(event);
+        if (event.is(WindowEvent.class)) window.onEvent(event);
+        if (event.is(FramebufferEvent.class)) framebuffer.onEvent(event);
     }
 
-    private void onMouseEvent(MouseEvent event) {
-        if (glfwGetInputMode(Platform.Window.handle, GLFW_CURSOR) == GLFW_CURSOR_DISABLED) return;
-
-        if (event.is(MouseMovedEvent.class)) {
-            final var position = ((MouseMovedEvent) event).getPosition();
-            final var hasViewport = io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable);
-
-            io.setMousePos(position.x() + (hasViewport ? Platform.Window.position.x : 0), position.y() + (hasViewport ? Platform.Window.position.y : 0));
-            return;
-        }
-
-        if (event.is(MouseButtonEvent.class)) {
-            final var button = ((MouseButtonEvent) event).getButton();
-            if (button > ImGuiMouseButton.COUNT) return;
-            io.setMouseDown(button, event.is(MousePressedEvent.class));
-            event.setHandled();
-            return;
-        }
-
-        if (event.is(MouseScrollEvent.class)) {
-            final var offset = ((MouseScrollEvent) event).getOffset();
-            io.setMouseWheelH(io.getMouseWheelH() + (float) offset.x());
-            io.setMouseWheel(io.getMouseWheel() + (float) offset.y());
-            event.setHandled();
-        }
-    }
-
-    private void onKeyboardEvent(KeyboardEvent event) {
-        io.setKeyCtrl(Platform.Keyboard.isActive(GLFW_KEY_LEFT_CONTROL) || Platform.Keyboard.isActive(GLFW_KEY_RIGHT_CONTROL));
-        io.setKeyShift(Platform.Keyboard.isActive(GLFW_KEY_LEFT_SHIFT) || Platform.Keyboard.isActive(GLFW_KEY_RIGHT_SHIFT));
-        io.setKeyAlt(Platform.Keyboard.isActive(GLFW_KEY_LEFT_ALT) || Platform.Keyboard.isActive(GLFW_KEY_RIGHT_ALT));
-        io.setKeySuper(Platform.Keyboard.isActive(GLFW_KEY_LEFT_SUPER) || Platform.Keyboard.isActive(GLFW_KEY_RIGHT_SUPER));
-
-        final var key = event.getKey();
-        if (event.is(KeyTypedEvent.class)) {
-            io.addInputCharacter(key);
-            event.setHandled();
-            return;
-        }
-
-        io.setKeysDown(key, event.is(KeyPressedEvent.class));
-        event.setHandled();
-    }
-
-    private void onWindowEvent(WindowEvent event) {
-        if (event.is(WindowFocusEvent.class)) {
-            io.addFocusEvent(event.is(WindowFocusGainedEvent.class));
-            return;
-        }
-
-        final var viewport = ImGui.findViewportByPlatformHandle(event.getWindow());
-        if (event.is(WindowCloseEvent.class)) {
-            viewport.setPlatformRequestClose(true);
-            return;
-        }
-
-        if (event.is(WindowPositionEvent.class)) {
-            viewport.setPlatformRequestMove(true);
-            return;
-        }
-
-        if (event.is(WindowSizeEvent.class)) {
-            final var size = ((WindowSizeEvent) event).getSize();
-            io.setDisplaySize(size.x(), size.y());
-            viewport.setPlatformRequestResize(true);
-            return;
-        }
-
-        if (event.is(WindowFramebufferSizeEvent.class)) {
-            io.setDisplayFramebufferScale(
-                    Platform.Window.framebuffer.x / (float) Platform.Window.size.x,
-                    Platform.Window.framebuffer.y / (float) Platform.Window.size.y
-            );
-        }
+    public void updateDisplay() {
+        io.setDisplaySize(Platform.window.get(Platform.Window.main).size.x, Platform.window.get(Platform.Window.main).size.y);
+        io.setDisplayFramebufferScale(
+                Platform.window.get(Platform.Window.main).framebuffer.x / (float) Platform.window.get(Platform.Window.main).size.x,
+                Platform.window.get(Platform.Window.main).framebuffer.y / (float) Platform.window.get(Platform.Window.main).size.y
+        );
     }
 
     public void updateDeltaTime() {
@@ -248,7 +195,7 @@ public final class Viewport implements Lifecycle, OnEvent {
 
     public void updateMouseCursor() {
         final boolean noCursorChange = io.hasConfigFlags(ImGuiConfigFlags.NoMouseCursorChange);
-        final boolean cursorDisabled = glfwGetInputMode(Platform.Window.handle, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
+        final boolean cursorDisabled = glfwGetInputMode(Platform.Window.main, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
 
         if (noCursorChange || cursorDisabled) {
             return;
@@ -271,12 +218,6 @@ public final class Viewport implements Lifecycle, OnEvent {
         }
     }
 
-    public void terminate() {
-        trace("Terminating GLFW integration");
-        for (int i = 0; i < ImGuiMouseCursor.COUNT; i++)
-            glfwDestroyCursor(mouseCursors[i]);
-    }
-
     private int monitors = 0;
     public void updateMonitors() {
         if (Platform.monitors.size() == monitors) return;
@@ -288,10 +229,16 @@ public final class Viewport implements Lifecycle, OnEvent {
             final var size = monitor.getSize();
             final var scale = monitor.getScale();
             platform.pushMonitors(
-                    position.x, position.y, size.x, size.y,
-                    position.x, position.y, size.x, size.y,
-                    scale.x
+                    position.x(), position.y(), size.x(), size.y(),
+                    position.x(), position.y(), size.x(), size.y(),
+                    scale.x()
             );
         }
+    }
+
+    public void terminate() {
+        trace("Terminating GLFW integration");
+        for (int i = 0; i < ImGuiMouseCursor.COUNT; i++)
+            glfwDestroyCursor(mouseCursors[i]);
     }
 }

@@ -69,9 +69,10 @@ public final class ImGuiLayer extends AbstractLayer {
     }
 
     protected void doBeforeGui() {
+        viewport.updateDisplay();
+        viewport.updateMonitors();
         viewport.updateDeltaTime();
         viewport.updateMouseCursor();
-        viewport.updateMonitors();
 
         ImGui.newFrame();
     }

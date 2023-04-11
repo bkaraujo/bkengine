@@ -15,6 +15,7 @@ import static br.bkraujo.engine.Logger.*;
 public final class Application implements Lifecycle {
     private static GraphicsContext graphics;
     private static boolean running = true;
+    private static boolean shutdown = false;
     private static Scene scene;
     private static Game game;
 
@@ -23,6 +24,9 @@ public final class Application implements Lifecycle {
     public static float frameTime = Float.MIN_VALUE;
 
     public static long frameCount;
+
+    public static boolean isRunning() { return running; }
+    public static boolean isShutdown() { return shutdown; }
 
     public static void setShouldStop() { running = false; }
 
@@ -103,7 +107,7 @@ public final class Application implements Lifecycle {
         window.show();
         debug("Starting Game Loop");
         while(running) {
-            if (Platform.Window.maximized) { platform.pollEvents(); continue; }
+            if (Platform.window.get(Platform.Window.main).maximized) { platform.pollEvents(); continue; }
 
             final var now = Time.nanos();
             final var delta = now - lastTime;
@@ -146,5 +150,6 @@ public final class Application implements Lifecycle {
         if (scene != null) scene.terminate();
         if (window != null) window.terminate();
         if (platform != null) platform.terminate();
+        shutdown = true;
     }
 }

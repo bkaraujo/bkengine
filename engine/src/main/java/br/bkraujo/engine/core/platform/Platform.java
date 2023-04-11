@@ -1,6 +1,7 @@
 package br.bkraujo.engine.core.platform;
 
 import br.bkraujo.engine.Lifecycle;
+import br.bkraujo.engine.core.platform.glfw.GLFWWindow;
 import br.bkraujo.engine.platform.AspectRatio;
 import br.bkraujo.game.GraphicsConfiguration;
 import br.bkraujo.game.PlatformConfiguration;
@@ -12,6 +13,8 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import static br.bkraujo.engine.Logger.error;
 import static br.bkraujo.engine.Logger.trace;
@@ -34,7 +37,6 @@ public final class Platform implements Lifecycle {
         return new GLFWWindow(title, platform, graphics);
     }
 
-
     public void pollEvents() {
         glfwPollEvents();
     }
@@ -48,21 +50,24 @@ public final class Platform implements Lifecycle {
         glfwTerminate();
     }
 
-    /** Read view of the current state */
-    public static abstract class Window {
-        private Window(){}
+    public static final Map<Long, Window> window = new TreeMap<>();
 
-        public static long handle;
-        public static String title;
-        public static final Vector2i size = Vectors.of(0,0);
-        public static final Vector2i position = Vectors.of(0,0);
-        public static final Vector2i framebuffer = Vectors.of(0,0);
-        public static AspectRatio ratio;
+    /** Read view of the current state */
+    public static class Window {
+        public static long main;
+        public final long handle;
+        public String title;
+        public final Vector2i size = Vectors.of(0,0);
+        public final Vector2i position = Vectors.of(0,0);
+        public final Vector2i framebuffer = Vectors.of(0,0);
+        public AspectRatio ratio = AspectRatio.FREE;
 
         // Set in reflectively by glfwCallback
-        public static boolean iconified;
-        public static boolean maximized;
-        public static boolean focused;
+        public boolean iconified;
+        public boolean maximized;
+        public boolean focused;
+
+        public Window(long handle) { this.handle = handle; }
     }
 
     /** Read view of the current state */

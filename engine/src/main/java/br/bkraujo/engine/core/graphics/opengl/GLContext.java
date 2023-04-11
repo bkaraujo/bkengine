@@ -13,7 +13,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class GLContext implements GraphicsContext {
     public boolean initialize() {
-        glfwMakeContextCurrent(Platform.Window.handle);
+        glfwMakeContextCurrent(Platform.Window.main);
         GL.createCapabilities();
 
         trace("GL_RENDERER: %s", glGetString(GL_RENDERER));
@@ -26,7 +26,7 @@ public class GLContext implements GraphicsContext {
     }
 
     public void clear() { glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); }
-    public void swap() { glfwSwapBuffers(Platform.Window.handle); }
+    public void swap() { glfwSwapBuffers(Platform.Window.main); }
     public GraphicsApi getGraphicsApi() { return GraphicsApi.OPENGL; }
     public void terminate() { GL.destroy(); }
 }
