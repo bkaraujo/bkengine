@@ -1,15 +1,20 @@
 package br.bkraujo.engine.core.scene.layer;
 
-import br.bkraujo.engine.core.platform.imgui.IMGUIUtils;
+import br.bkraujo.engine.core.platform.Platform;
 import br.bkraujo.engine.core.platform.imgui.Viewport;
 import br.bkraujo.engine.core.renderer.imgui.Renderer;
 import br.bkraujo.engine.event.Event;
 import br.bkraujo.engine.scene.layer.LayerType;
+import br.bkraujo.utils.FileUtils;
+import br.bkraujo.utils.Reflections;
 import imgui.ImGui;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.internal.ImGuiContext;
 import org.lwjgl.glfw.GLFW;
 
+import java.nio.file.Path;
+
+import static br.bkraujo.engine.Logger.trace;
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 
 public final class ImGuiLayer extends AbstractLayer {
@@ -20,10 +25,8 @@ public final class ImGuiLayer extends AbstractLayer {
     public LayerType getType() { return LayerType.UI; }
 
     protected boolean doInitialize() {
-        if (!IMGUIUtils.initialize()) return false;
-
-        context = ImGui.createContext();
-        ImGui.setCurrentContext(context);
+        if (!copyLibrary()) return false;
+        createContext();
 
         final var io = ImGui.getIO();
         final var platform = ImGui.getPlatformIO();
@@ -33,6 +36,32 @@ public final class ImGuiLayer extends AbstractLayer {
 
         if (!viewport.initialize()) return false;
         return renderer.initialize();
+    }
+
+    private boolean copyLibrary() {
+        final var fileName = "imgui" + (Platform.IS_WINDOWS ? ".dll" : Platform.IS_APPLE ? ".dylib" : ".so");
+        final var target = Path.of(Platform.IS_WINDOWS ? System.getenv("LOCALAPPDATA") + "/bkengine/": System.getProperty("java.io.tmpdir"), fileName);
+        trace("Creating library %s", target.toString());
+
+        // Points the loader to the external file
+        System.setProperty("imgui.library.name", fileName);
+        System.setProperty("imgui.library.path", target.getParent().toString());
+
+        if (FileUtils.exists(target)) return true;
+        if (!FileUtils.createDirectory(target.getParent())) return false;
+
+        final var loader = Reflections.classLoader();
+        final var stream = loader.getResourceAsStream("imgui/" + target.getFileName());
+        if (!FileUtils.copyTo(stream, target)) return false;
+
+
+        return true;
+    }
+
+    private void createContext() {
+        trace("Creating ImGui Context");
+        context = ImGui.createContext();
+        ImGui.setCurrentContext(context);
     }
 
     protected void doAfterEvent(Event event) {
@@ -63,6 +92,5 @@ public final class ImGuiLayer extends AbstractLayer {
         if (renderer!= null) renderer.terminate();
         if (viewport != null) viewport.terminate();
         if (context != null) ImGui.destroyContext(context);
-        IMGUIUtils.terminate();
     }
 }

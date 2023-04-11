@@ -1,6 +1,5 @@
 package br.bkraujo.utils;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +10,23 @@ import static br.bkraujo.engine.Logger.error;
 
 public abstract class FileUtils {
     private FileUtils() {}
+
+    public static boolean createDirectory(Path path) {
+        if (Files.exists(path)) return true;
+
+        try {
+            Files.createDirectory(path);
+        } catch (IOException ex) {
+            error("Failed to create %s", path.toString());
+            return false;
+        }
+
+        return true;
+    }
+
+    public static boolean exists(Path path) {
+        return Files.exists(path);
+    }
 
     public static boolean delete(Path path) {
         if (Files.notExists(path)) return true;
@@ -25,23 +41,19 @@ public abstract class FileUtils {
         return true;
     }
 
-    public static boolean copyTo(InputStream input, Path target) {
-        if (input == null) {
+    public static boolean copyTo(InputStream in, Path target) {
+        if (in == null) {
             error(String.format("Resource not found: %s", target.toString()));
             return false;
         }
 
+        final var buffer = new byte[1024];
         try {
-            final var temp = File.createTempFile(target.getFileName().toString(), "");
-            final var fos = new FileOutputStream(temp);
-
-            final var buffer = new byte[1024];
-            for (int i = input.read(buffer) ; i != -1 ; i = input.read(buffer)) fos.write(buffer, 0, i);
-
-            fos.close();
-            input.close();
-        } catch (Exception ex) {
-            error("Failed to System.load(%s): %s", target.getFileName(), ex.toString());
+            final var out = new FileOutputStream(target.toFile());
+            for (int i = in.read(buffer) ; i != -1 ; i = in.read(buffer)) out.write(buffer, 0, i);
+            out.close(); in.close();
+        } catch (IOException ex) {
+            error("Failed to create %s", target.getFileName(), ex.toString());
             return false;
         }
 

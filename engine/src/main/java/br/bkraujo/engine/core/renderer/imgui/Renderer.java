@@ -10,6 +10,7 @@ import imgui.flag.ImGuiConfigFlags;
 import imgui.flag.ImGuiViewportFlags;
 import imgui.type.ImInt;
 
+import static br.bkraujo.engine.Logger.trace;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.opengl.GL32.glDrawElementsBaseVertex;
 
@@ -38,6 +39,7 @@ public final class Renderer implements Lifecycle {
     }
 
     public boolean initialize() {
+        trace("Initializing OpenGL integration");
         io.setBackendRendererName(getClass().getCanonicalName());
         io.addBackendFlags(ImGuiBackendFlags.RendererHasViewports);
 
@@ -249,6 +251,7 @@ public final class Renderer implements Lifecycle {
     }
 
     public void terminate() {
+        trace("Terminating OpenGL integration");
         glDeleteBuffers(VBO);
         glDeleteBuffers(EBO);
         glDeleteTextures(gFontTexture);

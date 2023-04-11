@@ -13,6 +13,7 @@ import imgui.callback.ImStrConsumer;
 import imgui.callback.ImStrSupplier;
 import imgui.flag.*;
 
+import static br.bkraujo.engine.Logger.trace;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFWNativeWin32.glfwGetWin32Window;
 
@@ -30,6 +31,7 @@ public final class Viewport implements Lifecycle, OnEvent {
     }
 
     public boolean initialize() {
+        trace("Initializing GLFW integration");
         io.setBackendPlatformName(getClass().getCanonicalName());
         io.setConfigFlags(ImGuiConfigFlags.ViewportsEnable | ImGuiConfigFlags.DockingEnable);
         io.addBackendFlags(
@@ -270,6 +272,7 @@ public final class Viewport implements Lifecycle, OnEvent {
     }
 
     public void terminate() {
+        trace("Terminating GLFW integration");
         for (int i = 0; i < ImGuiMouseCursor.COUNT; i++)
             glfwDestroyCursor(mouseCursors[i]);
     }

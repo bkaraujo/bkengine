@@ -15,20 +15,24 @@ public abstract class AbstractLayer implements Layer {
 
     protected boolean doInitialize() { return true; }
     public boolean initialize() {
-        trace("Initializing layer %s", getName());
-        for (var actor : actors)
+        trace("%s :: Initializing", getName());
+        for (var actor : actors) {
+            trace("%s :: Initializing actor \"%s\"", getName(), actor.getName());
             if (!actor.initialize())
                 return false;
+        }
 
         return doInitialize();
     }
 
     protected void doTerminate() {}
     public final void terminate() {
-        trace("Terminating layer %s", getName());
+        trace("%s :: Terminating", getName());
         doTerminate();
-        for(var actor : actors)
+        for(var actor : actors) {
+            trace("%s :: Terminating actor \"%s\"", getName(), actor.getName());
             actor.terminate();
+        }
     }
 
     public Actor newActor() {

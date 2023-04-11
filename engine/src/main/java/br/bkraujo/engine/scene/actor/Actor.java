@@ -15,11 +15,9 @@ import br.bkraujo.utils.Reflections;
 import java.util.ArrayList;
 import java.util.List;
 
-import static br.bkraujo.engine.Logger.fatal;
-import static br.bkraujo.engine.Logger.warn;
+import static br.bkraujo.engine.Logger.*;
 
 public final class Actor implements Lifecycle, OnEvent, OnUpdate, OnRender, OnGui {
-
     private final List<Component> components = new ArrayList<>();
     private final List<Behaviour> behaviours = new ArrayList<>();
     private final TransformComponent transform = new TransformComponent();
@@ -65,13 +63,17 @@ public final class Actor implements Lifecycle, OnEvent, OnUpdate, OnRender, OnGu
     }
 
     public boolean initialize() {
-        for (var behaviour : behaviours)
+        for (var behaviour : behaviours) {
+            debug("%s :: Initializing behaviour \"%s\"", getName(), behaviour.getClass().getCanonicalName());
             if (!behaviour.initialize())
                 fatal("Failed to initialize Behaviour [%s]", behaviour.getClass().getCanonicalName());
+        }
 
-        for (var component : components)
+        for (var component : components) {
+            debug("%s :: Initializing component \"%s\"", getName(), component.getClass().getCanonicalName());
             if (!component.initialize())
                 fatal("Failed to initialize Component [%s]", component.getClass().getCanonicalName());
+        }
 
         return true;
     }
@@ -100,5 +102,11 @@ public final class Actor implements Lifecycle, OnEvent, OnUpdate, OnRender, OnGu
     }
 
     public void onGui() { for(var behaviour : behaviours) behaviour.onGui(); }
-    public void terminate() { for (var behaviour : behaviours) behaviour.terminate(); }
+    public void terminate() {
+        for (var behaviour : behaviours) {
+            debug("%s :: Terminating behaviour \"%s\"", getName(), behaviour.getClass().getCanonicalName());
+            behaviour.terminate();
+        }
+    }
+
 }
