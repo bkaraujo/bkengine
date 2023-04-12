@@ -1,9 +1,9 @@
 package br.pong.opengl;
 
-import br.bkraujo.engine.Application;
 import br.bkraujo.engine.LogLevel;
 import br.bkraujo.engine.Logger;
 import br.bkraujo.engine.scene.Scene;
+import br.bkraujo.game.Application;
 import br.bkraujo.game.Game;
 
 public final class Pong extends Game {

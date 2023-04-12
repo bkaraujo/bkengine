@@ -1,8 +1,8 @@
 package br.bkraujo.engine.scene;
 
+import br.bkraujo.core.scene.layer.ImGuiLayer;
+import br.bkraujo.core.scene.layer.WorldLayer;
 import br.bkraujo.engine.Lifecycle;
-import br.bkraujo.engine.core.scene.layer.ImGuiLayer;
-import br.bkraujo.engine.core.scene.layer.WorldLayer;
 import br.bkraujo.engine.event.Event;
 import br.bkraujo.engine.event.OnEvent;
 import br.bkraujo.engine.renderer.OnGui;

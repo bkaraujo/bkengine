@@ -1,7 +1,7 @@
 package br.bkraujo.engine.scene.camera;
 
-import br.bkraujo.engine.core.platform.Platform;
-import br.bkraujo.engine.core.scene.camera.AbstractCamera;
+import br.bkraujo.core.platform.Platform;
+import br.bkraujo.core.scene.camera.AbstractCamera;
 import br.bkraujo.utils.Vectors;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;

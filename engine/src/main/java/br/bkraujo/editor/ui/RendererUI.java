@@ -1,8 +1,8 @@
 package br.bkraujo.editor.ui;
 
-import br.bkraujo.engine.Application;
 import br.bkraujo.engine.renderer.Renderer;
 import br.bkraujo.engine.scene.actor.Behaviour;
+import br.bkraujo.game.Game;
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 
@@ -16,11 +16,11 @@ public final class RendererUI extends Behaviour {
     public void onGui() {
         if (ImGui.begin("Renderer", ImGuiWindowFlags.AlwaysAutoResize)) {
 
-            ImGui.textUnformatted(String.format(FPS, Application.fps));
-            ImGui.textUnformatted(String.format(UPS, Application.ups));
+            ImGui.textUnformatted(String.format(FPS, Game.fps));
+            ImGui.textUnformatted(String.format(UPS, Game.ups));
             ImGui.spacing();
-            ImGui.textUnformatted(String.format(FRAME, Application.frameCount));
-            ImGui.textUnformatted(String.format(FRAME_TIME, Application.frameTime));
+            ImGui.textUnformatted(String.format(FRAME, Game.frameCount));
+            ImGui.textUnformatted(String.format(FRAME_TIME, Game.frameTime));
             ImGui.textUnformatted(String.format(RENDERER_DRAW, Renderer.drawCalls));
         }
 

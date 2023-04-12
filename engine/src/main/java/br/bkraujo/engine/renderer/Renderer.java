@@ -1,7 +1,7 @@
 package br.bkraujo.engine.renderer;
 
-import br.bkraujo.engine.core.renderer.RenderCommand;
-import br.bkraujo.engine.core.renderer.Renderable;
+import br.bkraujo.core.renderer.RenderCommand;
+import br.bkraujo.core.renderer.Renderable;
 import br.bkraujo.engine.graphics.intrinsics.Shader;
 import br.bkraujo.engine.graphics.intrinsics.VertexArray;
 import br.bkraujo.engine.scene.camera.Camera;

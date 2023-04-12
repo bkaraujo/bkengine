@@ -1,6 +1,6 @@
 package br.bkraujo.engine.platform;
 
-import br.bkraujo.engine.core.platform.Platform;
+import br.bkraujo.core.platform.Platform;
 import br.bkraujo.utils.Vectors;
 import org.joml.Vector2fc;
 
