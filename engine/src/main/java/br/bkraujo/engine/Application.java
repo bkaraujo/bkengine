@@ -10,12 +10,14 @@ import br.bkraujo.engine.scene.Scene;
 import br.bkraujo.game.Game;
 import br.bkraujo.utils.Reflections;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import static br.bkraujo.engine.Logger.*;
 
 public final class Application implements Lifecycle {
     private static GraphicsContext graphics;
     private static boolean running = true;
-    private static boolean shutdown = false;
+    private static AtomicBoolean shutdown = new AtomicBoolean();
     private static Scene scene;
     private static Game game;
 
@@ -26,7 +28,7 @@ public final class Application implements Lifecycle {
     public static long frameCount;
 
     public static boolean isRunning() { return running; }
-    public static boolean isShutdown() { return shutdown; }
+    public static boolean isShutdown() { return shutdown.getAcquire(); }
 
     public static void setShouldStop() { running = false; }
 
@@ -150,6 +152,6 @@ public final class Application implements Lifecycle {
         if (scene != null) scene.terminate();
         if (window != null) window.terminate();
         if (platform != null) platform.terminate();
-        shutdown = true;
+        shutdown.getAndSet(true);
     }
 }

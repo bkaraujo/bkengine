@@ -1,5 +1,6 @@
 package br.bkraujo.engine.core.platform;
 
+import br.bkraujo.engine.Application;
 import br.bkraujo.utils.ThreadUtils;
 
 import java.util.Queue;
@@ -20,10 +21,10 @@ public final class Console {
     private static class Printer implements Runnable {
         @Override
         public void run() {
-            while (true) {
-                while (!queue.isEmpty()) System.out.println(queue.poll());
-
-                ThreadUtils.sleep(250);
+            while (!Application.isShutdown() || !queue.isEmpty()) {
+                ThreadUtils.sleep(3);
+                while (!queue.isEmpty())
+                    System.out.println(queue.poll());
             }
         }
     }
