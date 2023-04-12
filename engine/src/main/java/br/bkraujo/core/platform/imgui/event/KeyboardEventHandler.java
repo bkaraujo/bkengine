@@ -1,7 +1,10 @@
 package br.bkraujo.core.platform.imgui.event;
 
 import br.bkraujo.core.platform.Platform;
-import br.bkraujo.core.platform.event.*;
+import br.bkraujo.core.platform.event.KeyPressedEvent;
+import br.bkraujo.core.platform.event.KeyReleasedEvent;
+import br.bkraujo.core.platform.event.KeyRepeatedEvent;
+import br.bkraujo.core.platform.event.KeyTypedEvent;
 import br.bkraujo.engine.event.Event;
 import br.bkraujo.engine.event.OnEvent;
 import imgui.ImGuiIO;
@@ -20,9 +23,7 @@ public class KeyboardEventHandler implements OnEvent {
     }
 
     @Override
-    public void onEvent(Event e) {
-        final var event = (KeyboardEvent) e;
-
+    public void onEvent(Event event) {
         io.setKeyCtrl(Platform.Keyboard.isActive(GLFW_KEY_LEFT_CONTROL) || Platform.Keyboard.isActive(GLFW_KEY_RIGHT_CONTROL));
         io.setKeyShift(Platform.Keyboard.isActive(GLFW_KEY_LEFT_SHIFT) || Platform.Keyboard.isActive(GLFW_KEY_RIGHT_SHIFT));
         io.setKeyAlt(Platform.Keyboard.isActive(GLFW_KEY_LEFT_ALT) || Platform.Keyboard.isActive(GLFW_KEY_RIGHT_ALT));

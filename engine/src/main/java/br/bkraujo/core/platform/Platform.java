@@ -1,6 +1,7 @@
 package br.bkraujo.core.platform;
 
 import br.bkraujo.core.platform.glfw.GLFWWindow;
+import br.bkraujo.core.platform.glfw.callback.Callbacks;
 import br.bkraujo.engine.Lifecycle;
 import br.bkraujo.engine.platform.AspectRatio;
 import br.bkraujo.game.GraphicsConfiguration;
@@ -29,6 +30,11 @@ public final class Platform implements Lifecycle {
     public boolean initialize() {
         trace("Initializing Platform");
         if (!GLFW.glfwInit()) { error("GLFW failed to initialize"); return false; }
+        // Other callbacks
+        Callbacks.MONITOR.invoke(glfwGetPrimaryMonitor(), GLFW_DONT_CARE);
+
+        trace("Setting Monitor Callbacks");
+        glfwSetMonitorCallback(Callbacks.MONITOR);
 
         return true;
     }

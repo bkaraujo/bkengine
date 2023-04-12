@@ -1,6 +1,9 @@
 package br.bkraujo.core.platform.imgui.event;
 
-import br.bkraujo.core.platform.event.*;
+import br.bkraujo.core.platform.event.MouseButtonEvent;
+import br.bkraujo.core.platform.event.MouseMovedEvent;
+import br.bkraujo.core.platform.event.MousePressedEvent;
+import br.bkraujo.core.platform.event.MouseScrolledEvent;
 import br.bkraujo.engine.event.Event;
 import br.bkraujo.engine.event.OnEvent;
 import imgui.ImGuiIO;
@@ -20,8 +23,7 @@ public class MouseEventHandler implements OnEvent {
     }
 
     @Override
-    public void onEvent(Event e) {
-        final var event = (MouseEvent) e;
+    public void onEvent(Event event) {
         if (glfwGetInputMode(event.getWindow(), GLFW_CURSOR) == GLFW_CURSOR_DISABLED) return;
 
         if (event.is(MouseMovedEvent.class)) onMouseMove((MouseMovedEvent) event);

@@ -26,6 +26,7 @@ public class GLFWWindow implements br.bkraujo.engine.platform.Window {
     }
 
     public boolean initialize() {
+        trace("Initializing Main Window");
         final var resolution = platform.getWindowResolution();
         final var ratio = platform.getWindowAspectRation();
         final var size = Vectors.of(0, 0);
@@ -46,6 +47,7 @@ public class GLFWWindow implements br.bkraujo.engine.platform.Window {
             glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, conf.y());
         }
 
+        trace("Creating Window");
         handle = glfwCreateWindow(size.x, size.y, title, MemoryUtil.NULL, MemoryUtil.NULL);
         if (handle == 0) { error("GLFW failed to create window"); return false; }
 
@@ -71,33 +73,33 @@ public class GLFWWindow implements br.bkraujo.engine.platform.Window {
             error("GLFW failed to get Video Mode");
 
         } else {
+
+            trace("Centralizing Window");
             final var position = Vectors.of((mode.width() - size.x) / 2, (mode.height() - size.y) / 2);
             Platform.window.get(handle).position.set(position);
             glfwSetWindowPos(handle, position.x, position.y);
         }
 
         // Keyboard Callbacks
+        trace("Setting Keyboard Callbacks");
         glfwSetKeyCallback(handle, Callbacks.KEYBOARD);
         glfwSetCharCallback(handle, Callbacks.CHARACTER);
 
         // Mouse Callbacks
+        trace("Setting Mouse Callbacks");
         glfwSetScrollCallback(handle, Callbacks.CURSOR_SCROLL);
         glfwSetMouseButtonCallback(handle, Callbacks.CURSOR_BUTTON);
         glfwSetCursorPosCallback(handle, Callbacks.CURSOR_POSITION);
         glfwSetCursorEnterCallback(handle, Callbacks.CURSOR_ENTER);
 
         // Window callbacks
+        trace("Setting Window Callbacks");
         glfwSetWindowPosCallback(handle, Callbacks.WINDOW_POSITION);
         glfwSetWindowSizeCallback(handle, Callbacks.WINDOW_SIZE);
         glfwSetWindowFocusCallback(handle, Callbacks.WINDOW_FOCUS);
         glfwSetWindowIconifyCallback(handle, Callbacks.WINDOW_ICONIFY);
         glfwSetWindowMaximizeCallback(handle, Callbacks.WINDOW_MAXIMIZE);
         glfwSetWindowCloseCallback(handle, Callbacks.WINDOW_CLOSE);
-
-        // Other callbacks
-        Callbacks.MONITOR.invoke(glfwGetPrimaryMonitor(), GLFW_DONT_CARE);
-
-        glfwSetMonitorCallback(Callbacks.MONITOR);
         glfwSetFramebufferSizeCallback(handle, Callbacks.FRAMEBUFFER_SIZE);
 
         return true;

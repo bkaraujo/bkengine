@@ -18,9 +18,7 @@ public class WindowEventHandler implements OnEvent {
     }
 
     @Override
-    public void onEvent(Event e) {
-        final var event = (WindowEvent) e;
-
+    public void onEvent(Event event) {
         if (event.is(WindowFocusEvent.class)) onWindowFocus((WindowFocusEvent) event);
         if (event.is(WindowClosedEvent.class)) onWindowClose((WindowClosedEvent) event);
         if (event.is(WindowMovedEvent.class)) onWindowPosition((WindowMovedEvent) event);
