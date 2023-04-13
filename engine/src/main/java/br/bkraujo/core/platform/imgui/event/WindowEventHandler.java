@@ -38,7 +38,7 @@ public class WindowEventHandler implements OnEvent {
     private void onWindowPosition(WindowMovedEvent event) {
         final var viewport = ImGui.findViewportByPlatformHandle(event.getWindow());
         final var data = (ViewportData) viewport.getPlatformUserData();
-        if (ImGui.getFrameCount() <= data.ignoreWindowSizeEventFrame + 1) return;
+        if (data != null && ImGui.getFrameCount() <= data.ignoreWindowSizeEventFrame + 1) return;
 
         viewport.setPlatformRequestMove(true);
     }
@@ -46,7 +46,7 @@ public class WindowEventHandler implements OnEvent {
     private void onWindowResize(WindowResizedEvent event) {
         final var viewport = ImGui.findViewportByPlatformHandle(event.getWindow());
         final var data = (ViewportData) viewport.getPlatformUserData();
-        if (ImGui.getFrameCount() <= data.ignoreWindowSizeEventFrame + 1) return;
+        if (data != null && ImGui.getFrameCount() <= data.ignoreWindowSizeEventFrame + 1) return;
 
         viewport.setPlatformRequestResize(true);
     }

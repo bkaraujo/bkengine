@@ -53,7 +53,7 @@ public final class Viewport implements Lifecycle, OnEvent {
     public boolean initialize() {
         trace("Initializing GLFW integration");
         io.setBackendPlatformName(getClass().getCanonicalName());
-        io.setConfigFlags(ImGuiConfigFlags.ViewportsEnable | ImGuiConfigFlags.DockingEnable);
+        io.setConfigFlags(ImGuiConfigFlags.DockingEnable);
         io.addBackendFlags(
                 // We can honor GetMouseCursor() values (optional)
                 ImGuiBackendFlags.HasMouseCursors |
