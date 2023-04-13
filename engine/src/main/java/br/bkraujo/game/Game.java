@@ -63,7 +63,7 @@ public abstract class Game implements Lifecycle, OnEvent {
         window.show();
         debug("Starting Game Loop");
         while (running) {
-            if (Platform.window.get(Platform.Window.main).maximized) { platform.pollEvents(); continue; }
+            if (Platform.window.get(Platform.Window.main).iconified) { platform.pollEvents(); continue; }
 
             final var now = Time.nanos();
             final var delta = now - lastTime;

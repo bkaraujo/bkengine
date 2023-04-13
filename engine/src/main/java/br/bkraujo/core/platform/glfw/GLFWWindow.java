@@ -60,19 +60,20 @@ public class GLFWWindow implements br.bkraujo.engine.platform.Window {
             Platform.window.get(handle).framebuffer.set(xPtr.get(), yPtr.get());
         }
 
-        if (platform.getWindowMaximized()) return true;
+        if (!platform.getWindowMaximized()) {
+            final var monitor = glfwGetPrimaryMonitor();
+            final var mode = glfwGetVideoMode(monitor);
 
-        final var monitor = glfwGetPrimaryMonitor();
-        final var mode = glfwGetVideoMode(monitor);
-        if (mode == null) {
-            error("GLFW failed to get Video Mode");
+            if (mode == null) {
+                error("GLFW failed to get Video Mode");
 
-        } else {
+            } else {
 
-            trace("Centralizing Window");
-            final var position = Vectors.of((mode.width() - size.x) / 2, (mode.height() - size.y) / 2);
-            Platform.window.get(handle).position.set(position);
-            glfwSetWindowPos(handle, position.x, position.y);
+                trace("Centralizing Window");
+                final var position = Vectors.of((mode.width() - size.x) / 2, (mode.height() - size.y) / 2);
+                Platform.window.get(handle).position.set(position);
+                glfwSetWindowPos(handle, position.x, position.y);
+            }
         }
 
         // Keyboard Callbacks
