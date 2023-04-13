@@ -1,5 +1,6 @@
 package br.bkraujo.core.platform.glfw;
 
+import br.bkraujo.core.GameConfiguration;
 import br.bkraujo.core.platform.Platform;
 import br.bkraujo.core.platform.glfw.callback.Callbacks;
 import br.bkraujo.engine.graphics.GraphicsApi;
@@ -15,15 +16,9 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class GLFWWindow implements br.bkraujo.engine.platform.Window {
     private long handle;
-    private final String title;
-    private final PlatformConfiguration platform;
-    private final GraphicsConfiguration graphics;
-
-    public GLFWWindow(String title, PlatformConfiguration platform, GraphicsConfiguration graphics) {
-        this.title = title;
-        this.platform = platform;
-        this.graphics = graphics;
-    }
+    private final String title = GameConfiguration.name;
+    private final PlatformConfiguration platform = GameConfiguration.platform;
+    private final GraphicsConfiguration graphics = GameConfiguration.graphics;
 
     public boolean initialize() {
         trace("Initializing Main Window");

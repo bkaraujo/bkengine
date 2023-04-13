@@ -1,5 +1,6 @@
 package br.bkraujo.game;
 
+import br.bkraujo.core.GameConfiguration;
 import br.bkraujo.core.graphics.Graphics;
 import br.bkraujo.core.platform.Platform;
 import br.bkraujo.engine.Lifecycle;
@@ -10,7 +11,6 @@ import br.bkraujo.utils.Reflections;
 import static br.bkraujo.engine.Logger.*;
 
 public final class Application implements Lifecycle {
-    private static Game game;
 
     private static boolean shutdown;
     public static boolean isShutdown() { return shutdown; }
@@ -32,26 +32,30 @@ public final class Application implements Lifecycle {
         }
     }
 
-    private Window window;
-    private Platform platform;
+    private static Game game;
+    private final Window window;
+    private final Platform platform;
 
     public Application(Class<? extends Game> klass) {
         game = Reflections.instantiate(klass);
         if (game == null) fatal("Failed to create game instance");
+
+        GameConfiguration.company = game.getCompany();
+        GameConfiguration.name = game.getName();
+        GameConfiguration.graphics = game.getGraphicsConfiguration();
+        GameConfiguration.platform = game.getPlatformConfiguration();
+
+        platform = new Platform();
+        window = platform.create();
     }
 
     public boolean initialize() {
         debug("Initializing Platform");
-        platform = new Platform();
         if (!platform.initialize()) return false;
-
-        window = platform.create(game.getName(), game.getPlatformConfiguration(), game.getGraphicsConfiguration());
         if (!window.initialize()) return false;
 
         debug("Initializing Graphics Engine");
-        final var graphicsConfiguration = game.getGraphicsConfiguration();
-
-        final var graphics = Graphics.create(graphicsConfiguration.getGraphicsApi());
+        final var graphics = Graphics.create(GameConfiguration.graphics.getGraphicsApi());
         if (!graphics.initialize()) { error("Failed to initialize Graphics Context"); return false; }
 
         debug("Initializing Game");

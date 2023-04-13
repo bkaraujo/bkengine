@@ -15,7 +15,7 @@ public abstract class FileUtils {
         if (Files.exists(path)) return true;
 
         try {
-            Files.createDirectory(path);
+            Files.createDirectories(path);
         } catch (IOException ex) {
             error("Failed to create %s", path.toString());
             return false;
@@ -49,6 +49,7 @@ public abstract class FileUtils {
 
         final var buffer = new byte[1024];
         try {
+            createDirectory(target.getParent());
             final var out = new FileOutputStream(target.toFile());
             for (int i = in.read(buffer) ; i != -1 ; i = in.read(buffer)) out.write(buffer, 0, i);
             out.close(); in.close();

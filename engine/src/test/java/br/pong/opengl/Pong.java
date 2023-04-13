@@ -9,6 +9,7 @@ import br.bkraujo.game.Game;
 public final class Pong extends Game {
     public static void main(String[] args) { Logger.level = LogLevel.TRACE; Application.run(Pong.class); }
 
+    public String getCompany() { return "BKraujo"; }
     public String getName() { return "Pong"; }
     public Class<? extends Scene> getScene() { return GameScene.class; }
 }

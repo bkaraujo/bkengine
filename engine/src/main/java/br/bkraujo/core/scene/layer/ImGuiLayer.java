@@ -1,5 +1,6 @@
 package br.bkraujo.core.scene.layer;
 
+import br.bkraujo.core.GameConfiguration;
 import br.bkraujo.core.platform.Platform;
 import br.bkraujo.core.platform.imgui.Viewport;
 import br.bkraujo.core.renderer.imgui.Renderer;
@@ -40,7 +41,14 @@ public final class ImGuiLayer extends AbstractLayer {
 
     private boolean copyLibrary() {
         final var fileName = "imgui" + (Platform.IS_WINDOWS ? ".dll" : Platform.IS_APPLE ? ".dylib" : ".so");
-        final var target = Path.of(Platform.IS_WINDOWS ? System.getenv("LOCALAPPDATA") + "/bkengine/": System.getProperty("java.io.tmpdir"), fileName);
+        final Path target;
+
+        if (Platform.IS_WINDOWS) {
+            target = Path.of(System.getenv("LOCALAPPDATA"), GameConfiguration.company, GameConfiguration.name, fileName);
+        } else {
+            target = Path.of(System.getProperty("user.home"), GameConfiguration.company, GameConfiguration.name, fileName);
+        }
+
         trace("Creating library %s", target.toString());
 
         // Points the loader to the external file
@@ -52,10 +60,7 @@ public final class ImGuiLayer extends AbstractLayer {
 
         final var loader = Reflections.classLoader();
         final var stream = loader.getResourceAsStream("imgui/" + target.getFileName());
-        if (!FileUtils.copyTo(stream, target)) return false;
-
-
-        return true;
+        return FileUtils.copyTo(stream, target);
     }
 
     private void createContext() {
@@ -69,7 +74,6 @@ public final class ImGuiLayer extends AbstractLayer {
     }
 
     protected void doBeforeGui() {
-        viewport.updateDisplay();
         viewport.updateMonitors();
         viewport.updateDeltaTime();
         viewport.updateMouseCursor();

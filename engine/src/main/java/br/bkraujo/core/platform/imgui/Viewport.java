@@ -69,6 +69,7 @@ public final class Viewport implements Lifecycle, OnEvent {
         initializeClipBoard();
         initializeCursors();
         initializeViewport();
+        initializeDisplay();
 
         return true;
     }
@@ -171,22 +172,22 @@ public final class Viewport implements Lifecycle, OnEvent {
         }
     }
 
-    @Override
-    public void onEvent(Event event) {
-        if (event.getWindow() == Platform.Window.main) return;
-
-        if (event.is(MouseEvent.class)) mouse.onEvent(event);
-        if (event.is(KeyboardEvent.class)) keyboard.onEvent(event);
-        if (event.is(WindowEvent.class)) window.onEvent(event);
-        if (event.is(FramebufferEvent.class)) framebuffer.onEvent(event);
-    }
-
-    public void updateDisplay() {
+    private void initializeDisplay() {
         final var size = Platform.window.get(Platform.Window.main).size;
         final var framebuffer = Platform.window.get(Platform.Window.main).framebuffer;
 
         io.setDisplaySize(size.x, size.y);
         io.setDisplayFramebufferScale(framebuffer.x / (float) size.x, framebuffer.y / (float) size.y);
+    }
+
+    @Override
+    public void onEvent(Event event) {
+//        if (event.getWindow() == Platform.Window.main) return;
+
+        if (event.is(MouseEvent.class)) mouse.onEvent(event);
+        if (event.is(KeyboardEvent.class)) keyboard.onEvent(event);
+        if (event.is(WindowEvent.class)) window.onEvent(event);
+        if (event.is(FramebufferEvent.class)) framebuffer.onEvent(event);
     }
 
     public void updateDeltaTime() {

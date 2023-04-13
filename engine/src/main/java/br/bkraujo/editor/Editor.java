@@ -9,6 +9,7 @@ import br.bkraujo.game.Game;
 public class Editor extends Game {
     public static void main(String[] args) { Logger.level = LogLevel.TRACE; Application.run(Editor.class); }
 
+    public String getCompany() { return "BKraujo"; }
     public String getName() { return "Editor"; }
     public Class<? extends Scene> getScene() { return EditorScene.class; }
 

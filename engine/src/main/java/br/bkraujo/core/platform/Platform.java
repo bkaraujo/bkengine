@@ -4,8 +4,6 @@ import br.bkraujo.core.platform.glfw.GLFWWindow;
 import br.bkraujo.core.platform.glfw.callback.Callbacks;
 import br.bkraujo.engine.Lifecycle;
 import br.bkraujo.engine.platform.AspectRatio;
-import br.bkraujo.game.GraphicsConfiguration;
-import br.bkraujo.game.PlatformConfiguration;
 import br.bkraujo.utils.Vectors;
 import org.joml.Vector2d;
 import org.joml.Vector2f;
@@ -39,8 +37,8 @@ public final class Platform implements Lifecycle {
         return true;
     }
 
-    public br.bkraujo.engine.platform.Window create(String title, PlatformConfiguration platform,  GraphicsConfiguration graphics) {
-        return new GLFWWindow(title, platform, graphics);
+    public br.bkraujo.engine.platform.Window create() {
+        return new GLFWWindow();
     }
 
     public void pollEvents() {

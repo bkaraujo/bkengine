@@ -27,6 +27,7 @@ public abstract class Game implements Lifecycle, OnEvent {
     private Window window;
     private Platform platform;
 
+    public abstract String getCompany();
     public abstract String getName();
 
     protected boolean doInitialize() { return true; }
