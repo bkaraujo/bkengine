@@ -1,6 +1,7 @@
 package br.bkraujo.core.platform.imgui.event;
 
 import br.bkraujo.core.platform.event.*;
+import br.bkraujo.core.platform.imgui.ViewportData;
 import br.bkraujo.engine.event.Event;
 import br.bkraujo.engine.event.OnEvent;
 import imgui.ImGui;
@@ -26,9 +27,8 @@ public class WindowEventHandler implements OnEvent {
     }
 
     private void onWindowClose(WindowClosedEvent event) {
-        ImGui
-                .findViewportByPlatformHandle(event.getWindow())
-                .setPlatformRequestClose(true);
+        final var viewport = ImGui.findViewportByPlatformHandle(event.getWindow());
+        viewport.setPlatformRequestClose(true);
     }
 
     private void onWindowFocus(WindowFocusEvent event) {
@@ -36,18 +36,18 @@ public class WindowEventHandler implements OnEvent {
     }
 
     private void onWindowPosition(WindowMovedEvent event) {
-        ImGui
-                .findViewportByPlatformHandle(event.getWindow())
-                .setPlatformRequestMove(true);
+        final var viewport = ImGui.findViewportByPlatformHandle(event.getWindow());
+        final var data = (ViewportData) viewport.getPlatformUserData();
+        if (ImGui.getFrameCount() <= data.ignoreWindowSizeEventFrame + 1) return;
+
+        viewport.setPlatformRequestMove(true);
     }
 
     private void onWindowResize(WindowResizedEvent event) {
-        final var size = event.getSize();
-        io.setDisplaySize(size.x(), size.y());
+        final var viewport = ImGui.findViewportByPlatformHandle(event.getWindow());
+        final var data = (ViewportData) viewport.getPlatformUserData();
+        if (ImGui.getFrameCount() <= data.ignoreWindowSizeEventFrame + 1) return;
 
-        ImGui
-                .findViewportByPlatformHandle(event.getWindow())
-                .setPlatformRequestResize(true);
+        viewport.setPlatformRequestResize(true);
     }
-
 }

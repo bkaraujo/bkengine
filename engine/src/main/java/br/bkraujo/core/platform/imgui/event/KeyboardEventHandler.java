@@ -24,15 +24,15 @@ public class KeyboardEventHandler implements OnEvent {
 
     @Override
     public void onEvent(Event event) {
-        io.setKeyCtrl(Platform.Keyboard.isActive(GLFW_KEY_LEFT_CONTROL) || Platform.Keyboard.isActive(GLFW_KEY_RIGHT_CONTROL));
-        io.setKeyShift(Platform.Keyboard.isActive(GLFW_KEY_LEFT_SHIFT) || Platform.Keyboard.isActive(GLFW_KEY_RIGHT_SHIFT));
-        io.setKeyAlt(Platform.Keyboard.isActive(GLFW_KEY_LEFT_ALT) || Platform.Keyboard.isActive(GLFW_KEY_RIGHT_ALT));
-        io.setKeySuper(Platform.Keyboard.isActive(GLFW_KEY_LEFT_SUPER) || Platform.Keyboard.isActive(GLFW_KEY_RIGHT_SUPER));
-
         if (event.is(KeyTypedEvent.class)) onKeyTyped((KeyTypedEvent) event);
         if (event.is(KeyPressedEvent.class)) onKeyPressed((KeyPressedEvent) event);
         if (event.is(KeyReleasedEvent.class)) onKeyReleased((KeyReleasedEvent) event);
         if (event.is(KeyRepeatedEvent.class)) onKeyRepeated((KeyRepeatedEvent) event);
+
+        io.setKeyCtrl(Platform.Keyboard.isActive(GLFW_KEY_LEFT_CONTROL) || Platform.Keyboard.isActive(GLFW_KEY_RIGHT_CONTROL));
+        io.setKeyShift(Platform.Keyboard.isActive(GLFW_KEY_LEFT_SHIFT) || Platform.Keyboard.isActive(GLFW_KEY_RIGHT_SHIFT));
+        io.setKeyAlt(Platform.Keyboard.isActive(GLFW_KEY_LEFT_ALT) || Platform.Keyboard.isActive(GLFW_KEY_RIGHT_ALT));
+        io.setKeySuper(Platform.Keyboard.isActive(GLFW_KEY_LEFT_SUPER) || Platform.Keyboard.isActive(GLFW_KEY_RIGHT_SUPER));
     }
 
     private void onKeyTyped(KeyTypedEvent event) {

@@ -182,8 +182,6 @@ public final class Viewport implements Lifecycle, OnEvent {
 
     @Override
     public void onEvent(Event event) {
-//        if (event.getWindow() == Platform.Window.main) return;
-
         if (event.is(MouseEvent.class)) mouse.onEvent(event);
         if (event.is(KeyboardEvent.class)) keyboard.onEvent(event);
         if (event.is(WindowEvent.class)) window.onEvent(event);
