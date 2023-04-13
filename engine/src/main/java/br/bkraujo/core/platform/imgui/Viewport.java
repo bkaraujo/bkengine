@@ -57,12 +57,11 @@ public final class Viewport implements Lifecycle, OnEvent {
         io.addBackendFlags(
                 // We can honor GetMouseCursor() values (optional)
                 ImGuiBackendFlags.HasMouseCursors |
-                        // We can honor io.WantSetMousePos requests (optional, rarely used)
-                        ImGuiBackendFlags.HasSetMousePos |
-                        // We can create multi-viewports on the Platform side (optional)
-                        ImGuiBackendFlags.PlatformHasViewports |
-                        // We can set io.MouseHoveredViewport correctly (optional, not easy)
-                        (GLFWUtils.hasMousePassThrough ? ImGuiBackendFlags.HasMouseHoveredViewport : ImGuiBackendFlags.None)
+                // We can create multi-viewports on the Platform side (optional)
+                ImGuiBackendFlags.PlatformHasViewports
+                // We can set io.MouseHoveredViewport correctly (optional, not easy)
+                // Implemented, but if turned on, IM_ASSERT fires up
+                // | ImGuiBackendFlags.HasMouseHoveredViewport
         );
 
         initializeKeyboardMapping();
