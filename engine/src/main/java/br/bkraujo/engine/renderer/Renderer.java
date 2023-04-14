@@ -27,7 +27,7 @@ public abstract class Renderer {
         drawCalls = 0;
         commands.clear();
         submissions.clear();
-        Renderer.viewProjection.set(camera.getViewProjection());
+        viewProjection.set(camera.getViewProjection());
     }
 
     public static void submit(GeometryComponent geometry, Matrix4fc transform){
@@ -39,7 +39,7 @@ public abstract class Renderer {
 
     public static void endScene(){
         for (var entry : submissions.entrySet())
-            commands.add(new RenderCommand(Renderer.viewProjection, entry.getKey(), entry.getValue()));
+            commands.add(new RenderCommand(viewProjection, entry.getKey(), entry.getValue()));
     }
 
     public static void flush(){ for (var command : commands) drawCalls += command.run(); }
