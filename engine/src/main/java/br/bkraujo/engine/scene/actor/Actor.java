@@ -3,7 +3,7 @@ package br.bkraujo.engine.scene.actor;
 import br.bkraujo.engine.Lifecycle;
 import br.bkraujo.engine.event.Event;
 import br.bkraujo.engine.event.OnEvent;
-import br.bkraujo.engine.graphics.MeshComponent;
+import br.bkraujo.engine.graphics.GeometryComponent;
 import br.bkraujo.engine.graphics.TransformComponent;
 import br.bkraujo.engine.renderer.OnGui;
 import br.bkraujo.engine.renderer.OnRender;
@@ -89,16 +89,16 @@ public final class Actor implements Lifecycle, OnEvent, OnUpdate, OnRender, OnGu
     }
 
     public void onRender() {
-        final var component = getComponent(MeshComponent.class);
-        if (component == null) return;
+        final var geometry = getComponent(GeometryComponent.class);
+        if (geometry == null) return;
 
-        if (component.array.getVertexes().isEmpty()) {
-            warn("[%s] MeshComponent has no vertex", getName());
+        if (geometry.vertex.getVertexes().isEmpty()) {
+            warn("[%s] GeometryComponent has no vertex", getName());
             return;
         }
 
         final var matrix = Matrices.translate(transform.translation);
-        Renderer.submit(component.shader, component.array, matrix);
+        Renderer.submit(geometry, matrix);
     }
 
     public void onGui() { for(var behaviour : behaviours) behaviour.onGui(); }

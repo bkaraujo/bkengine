@@ -26,6 +26,7 @@ public final class RendererUI extends Behaviour {
 
         ImGui.end();
 
+        ImGui.showDemoWindow();
     }
 
 }

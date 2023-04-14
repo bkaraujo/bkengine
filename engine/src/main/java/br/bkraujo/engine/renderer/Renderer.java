@@ -2,8 +2,8 @@ package br.bkraujo.engine.renderer;
 
 import br.bkraujo.core.renderer.RenderCommand;
 import br.bkraujo.core.renderer.Renderable;
+import br.bkraujo.engine.graphics.GeometryComponent;
 import br.bkraujo.engine.graphics.intrinsics.Shader;
-import br.bkraujo.engine.graphics.intrinsics.VertexArray;
 import br.bkraujo.engine.scene.camera.Camera;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
@@ -30,9 +30,11 @@ public abstract class Renderer {
         Renderer.viewProjection.set(camera.getViewProjection());
     }
 
-    public static void submit(Shader shader, VertexArray geometry, Matrix4fc transform){
+    public static void submit(GeometryComponent geometry, Matrix4fc transform){
+        final var shader = geometry.material.getShader();
+
         if (!submissions.containsKey(shader)) submissions.put(shader, new ArrayList<>());
-        submissions.get(shader).add(new Renderable(geometry, transform));
+        submissions.get(shader).add(new Renderable(geometry.vertex, geometry.material, transform));
     }
 
     public static void endScene(){

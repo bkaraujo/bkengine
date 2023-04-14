@@ -27,8 +27,9 @@ public final class RenderCommand {
 
         var draws = 0;
         for(var renderable : renderables) {
-            renderable.vertexArray.bind();
             shader.setUniformMatrix("uTransform", false, renderable.transform);
+            renderable.material.bind();
+            renderable.vertexArray.bind();
             backend.drawIndexed(renderable.vertexArray);
             draws++;
         }

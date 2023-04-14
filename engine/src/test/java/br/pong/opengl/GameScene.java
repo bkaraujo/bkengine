@@ -1,7 +1,7 @@
 package br.pong.opengl;
 
+import br.bkraujo.engine.graphics.GeometryComponent;
 import br.bkraujo.engine.graphics.GraphicsFactory;
-import br.bkraujo.engine.graphics.MeshComponent;
 import br.bkraujo.engine.graphics.intrinsics.BufferLayout;
 import br.bkraujo.engine.graphics.intrinsics.Shader;
 import br.bkraujo.engine.graphics.intrinsics.ShaderDataType;
@@ -48,8 +48,8 @@ public class GameScene extends Scene {
     private boolean initializePlayerLeft(Layer world, Vector4fc viewport, Shader shader) {
         final var left = world.newActor("LEFT");
         if (!initializePlayer(left, shader, GLFW_KEY_W, GLFW_KEY_S)) return false;
-        //noinspection ConstantConditions
-        left.getComponent(MeshComponent.class).array.addVertex(
+        final var geometry = left.getComponent(GeometryComponent.class);
+        geometry.vertex.addVertex(
                 new float[]{
                         viewport.x() + Geometry.PADDLE_WIDTH,  Geometry.PADDLE_HEIGHT, 0.0f,  // top right
                         viewport.x() + Geometry.PADDLE_WIDTH, -Geometry.PADDLE_HEIGHT, 0.0f,  // bottom right
@@ -63,8 +63,8 @@ public class GameScene extends Scene {
     private boolean initializePlayerRight(Layer world, Vector4fc viewport, Shader shader) {
         final var right = world.newActor("RIGHT");
         if (!initializePlayer(right, shader, GLFW_KEY_UP, GLFW_KEY_DOWN)) return false;
-        //noinspection ConstantConditions
-        right.getComponent(MeshComponent.class).array.addVertex(
+        final var geometry = right.getComponent(GeometryComponent.class);
+        geometry.vertex.addVertex(
                 new float[]{
                         viewport.y() - Geometry.PADDLE_WIDTH,  Geometry.PADDLE_HEIGHT, 0.0f,  // top right
                         viewport.y() - Geometry.PADDLE_WIDTH, -Geometry.PADDLE_HEIGHT, 0.0f,  // bottom right
@@ -76,9 +76,9 @@ public class GameScene extends Scene {
     }
 
     private boolean initializePlayer(Actor player, Shader shader, int up, int down) {
-        final var mesh = player.addComponent(MeshComponent.class);
-        mesh.shader = shader;
-        mesh.array.setIndex(
+        final var geometry = player.addComponent(GeometryComponent.class);
+        geometry.material.setShader(shader);
+        geometry.vertex.setIndex(
                 0, 1, 3,   // first triangle
                 1, 2, 3    // second triangle
         );
@@ -96,7 +96,7 @@ public class GameScene extends Scene {
         final var ball = world.newActor("BALL");
         final var velocity = ball.addComponent(VelocityComponent.class);
         velocity.velocity = 1.0f;
-//        final var mesh = ball.addComponent(MeshComponent.class);
+//        final var mesh = ball.addComponent(GeometryComponent.class);
         return true;
     }
 }
