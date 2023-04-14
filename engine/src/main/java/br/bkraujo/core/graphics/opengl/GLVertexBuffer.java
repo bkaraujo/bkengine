@@ -14,14 +14,12 @@ final class GLVertexBuffer extends GLObject implements VertexBuffer {
 
     final int handle;
     private final List<BufferLayout> layouts = new ArrayList<>();
-
-
+    private final int count;
     public GLVertexBuffer(float ... vertices) {
         if (vertices == null) { fatal("Null or Empty vertices"); }
-
+        count = vertices.length;
         handle = glGenBuffers(); hasError();
         glBindBuffer(GL_ARRAY_BUFFER, handle); hasError();
-        //noinspection ConstantConditions
         glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW); hasError();
         glBindBuffer(GL_ARRAY_BUFFER, GL_NONE);
     }
@@ -41,6 +39,7 @@ final class GLVertexBuffer extends GLObject implements VertexBuffer {
     }
 
     public List<BufferLayout> getLayout() { return layouts; }
+    public int getVertexCount() { return count; }
     public void bind() { glBindBuffer(GL_ARRAY_BUFFER, handle); }
     public void unbind() { glBindBuffer(GL_ARRAY_BUFFER, GL_NONE); }
     public void terminate() { glDeleteBuffers(handle); }

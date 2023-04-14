@@ -1,5 +1,7 @@
 package br.pong.opengl;
 
+import br.bkraujo.engine.debug.DebugUI;
+import br.bkraujo.engine.debug.RendererUI;
 import br.bkraujo.engine.graphics.GeometryComponent;
 import br.bkraujo.engine.graphics.GraphicsFactory;
 import br.bkraujo.engine.graphics.intrinsics.BufferLayout;
@@ -12,7 +14,9 @@ import br.bkraujo.engine.scene.camera.Camera;
 import br.bkraujo.engine.scene.camera.OrthographicCamera;
 import br.bkraujo.engine.scene.layer.Layer;
 import br.bkraujo.engine.scene.layer.LayerType;
+import br.bkraujo.utils.MathUtils;
 import br.bkraujo.utils.Resources;
+import org.joml.Math;
 import org.joml.Vector4fc;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -26,7 +30,8 @@ public class GameScene extends Scene {
 
     @Override
     protected boolean doInitialize() {
-        getLayer(LayerType.UI).newActor().addBehaviour(UIBehaviour.class);
+        getLayer(LayerType.UI).newActor().addBehaviour(RendererUI.class);
+        getLayer(LayerType.UI).newActor().addBehaviour(DebugUI.class);
         final var world = getLayer(LayerType.WORLD);
 
         final var shader = GraphicsFactory.intrinsic().shader();
@@ -96,7 +101,30 @@ public class GameScene extends Scene {
         final var ball = world.newActor("BALL");
         final var velocity = ball.addComponent(VelocityComponent.class);
         velocity.velocity = 1.0f;
-//        final var mesh = ball.addComponent(GeometryComponent.class);
+
+        final var geometry = ball.addComponent(GeometryComponent.class);
+        geometry.material.setShader(shader);
+        geometry.vertex.addVertex(
+                circle( 16),
+                new BufferLayout(ShaderDataType.FLOAT3, "iPosition")
+        );
+
         return true;
+    }
+
+    private float[] circle(int numberOfSides) {
+        final var numberOfVertices = numberOfSides + 2;
+        final var circle = new float[numberOfVertices * 3];
+        circle[0] = circle[1] = circle[2] = 0f; // center
+
+        for (int i = 1 ; i < numberOfVertices; ++i) {
+            final var theta = i * MathUtils.PI2f / numberOfSides;
+
+            circle[ i * 3     ] = Math.cos(theta); // x
+            circle[(i * 3) + 1] = Math.sin(theta); // y
+            circle[(i * 3) + 2] = 0;               // z
+        }
+
+        return circle;
     }
 }

@@ -16,7 +16,7 @@ final class GLVertexArray extends GLObject implements VertexArray {
     final int handle;
     private final List<VertexBuffer> vertexes = new ArrayList<>();
     private IndexBuffer index;
-
+    private int vertexCount;
     public GLVertexArray() {
         handle = glGenVertexArrays();
     }
@@ -46,6 +46,7 @@ final class GLVertexArray extends GLObject implements VertexArray {
                 hasError();
             }
 
+            vertexCount += buffer.getVertexCount();
             vertexes.add(buffer);
         } finally {
             glBindVertexArray(GL_NONE);
@@ -73,6 +74,11 @@ final class GLVertexArray extends GLObject implements VertexArray {
     }
 
     public List<VertexBuffer> getVertexes() { return vertexes; }
+
+    public int getVertexCount() {
+        return vertexCount;
+    }
+
     public IndexBuffer getIndex() { return index; }
     public void bind() { glBindVertexArray(handle); }
     public void unbind() { glBindVertexArray(GL_NONE); }

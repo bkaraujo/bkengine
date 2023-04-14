@@ -14,4 +14,5 @@ public interface VertexArray extends Buffer, Bindable {
 
     IndexBuffer getIndex();
     List<VertexBuffer> getVertexes();
+    int getVertexCount();
 }

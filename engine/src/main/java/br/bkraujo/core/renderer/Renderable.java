@@ -7,11 +7,11 @@ import org.joml.Matrix4fc;
 public final class Renderable {
 
     public final Material material;
-    public final VertexArray vertexArray;
+    public final VertexArray vertex;
     public final Matrix4fc transform;
 
-    public Renderable(VertexArray vertexArray, Material material, Matrix4fc transform) {
-        this.vertexArray = vertexArray;
+    public Renderable(VertexArray vertex, Material material, Matrix4fc transform) {
+        this.vertex = vertex;
         this.material = material;
         this.transform = transform;
     }

@@ -1,4 +1,4 @@
-package br.bkraujo.editor.ui;
+package br.bkraujo.engine.debug;
 
 import br.bkraujo.engine.renderer.Renderer;
 import br.bkraujo.engine.scene.actor.Behaviour;
@@ -25,8 +25,6 @@ public final class RendererUI extends Behaviour {
         }
 
         ImGui.end();
-
-        ImGui.showDemoWindow();
     }
 
 }

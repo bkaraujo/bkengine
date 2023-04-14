@@ -1,6 +1,6 @@
 package br.bkraujo.editor;
 
-import br.bkraujo.editor.ui.RendererUI;
+import br.bkraujo.engine.debug.RendererUI;
 import br.bkraujo.engine.scene.Scene;
 import br.bkraujo.engine.scene.camera.Camera;
 import br.bkraujo.engine.scene.camera.OrthographicCamera;

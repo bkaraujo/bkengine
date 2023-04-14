@@ -10,4 +10,9 @@ public class GLBackend implements RendererBackend {
         glDrawElements(GL_TRIANGLES, array.getIndex().getCount(), GL_UNSIGNED_INT, 0);
     }
 
+    @Override
+    public void draw(VertexArray array) {
+        glDrawArrays(GL_TRIANGLE_FAN, 0, array.getVertexCount());
+    }
+
 }

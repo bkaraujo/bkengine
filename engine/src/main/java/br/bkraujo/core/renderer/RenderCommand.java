@@ -29,8 +29,11 @@ public final class RenderCommand {
         for(var renderable : renderables) {
             shader.setUniformMatrix("uTransform", false, renderable.transform);
             renderable.material.bind();
-            renderable.vertexArray.bind();
-            backend.drawIndexed(renderable.vertexArray);
+            renderable.vertex.bind();
+
+            if (renderable.vertex.getIndex() == null) backend.draw(renderable.vertex);
+            else backend.drawIndexed(renderable.vertex);
+
             draws++;
         }
 

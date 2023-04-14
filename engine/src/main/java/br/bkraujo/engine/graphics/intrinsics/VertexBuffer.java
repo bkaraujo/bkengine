@@ -8,4 +8,5 @@ public interface VertexBuffer extends Buffer, Bindable {
 
     void setLayout(BufferLayout... layout);
     List<BufferLayout> getLayout();
+    int getVertexCount();
 }
