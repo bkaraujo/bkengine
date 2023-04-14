@@ -1,12 +1,10 @@
 package br.bkraujo.core.platform.imgui;
 
 import br.bkraujo.core.platform.Platform;
-import br.bkraujo.core.platform.event.FramebufferEvent;
 import br.bkraujo.core.platform.event.KeyboardEvent;
 import br.bkraujo.core.platform.event.MouseEvent;
 import br.bkraujo.core.platform.event.WindowEvent;
 import br.bkraujo.core.platform.glfw.GLFWUtils;
-import br.bkraujo.core.platform.imgui.event.FramebufferEventHandler;
 import br.bkraujo.core.platform.imgui.event.KeyboardEventHandler;
 import br.bkraujo.core.platform.imgui.event.MouseEventHandler;
 import br.bkraujo.core.platform.imgui.event.WindowEventHandler;
@@ -31,10 +29,9 @@ import static org.lwjgl.glfw.GLFWNativeWin32.glfwGetWin32Window;
 public final class Viewport implements Lifecycle, OnEvent {
     private final ImGuiIO io;
     private final ImGuiPlatformIO platform;
-    private final MouseEventHandler mouse;
-    private final WindowEventHandler window;
-    private final KeyboardEventHandler keyboard;
-    private final FramebufferEventHandler framebuffer;
+    private final MouseEventHandler mouseEventHandler;
+    private final WindowEventHandler windowEventHandler;
+    private final KeyboardEventHandler keyboardEventHandler;
 
     private final long[] mouseCursors = new long[ImGuiMouseCursor.COUNT];
 
@@ -44,10 +41,9 @@ public final class Viewport implements Lifecycle, OnEvent {
         this.io = io;
         this.platform = platform;
 
-        mouse = new MouseEventHandler(io, platform);
-        window = new WindowEventHandler(io, platform);
-        keyboard = new KeyboardEventHandler(io, platform);
-        framebuffer = new FramebufferEventHandler(io, platform);
+        mouseEventHandler = new MouseEventHandler(io, platform);
+        windowEventHandler = new WindowEventHandler(io, platform);
+        keyboardEventHandler = new KeyboardEventHandler(io, platform);
     }
 
     public boolean initialize() {
@@ -181,45 +177,55 @@ public final class Viewport implements Lifecycle, OnEvent {
 
     @Override
     public void onEvent(Event event) {
-        if (event.is(MouseEvent.class)) { mouse.onEvent(event); return; }
-        if (event.is(KeyboardEvent.class)) { keyboard.onEvent(event); return; }
-        if (event.is(WindowEvent.class)) { window.onEvent(event); return; }
-        if (event.is(FramebufferEvent.class)) framebuffer.onEvent(event);
+        if (event.is(MouseEvent.class)) { mouseEventHandler.onEvent(event); return; }
+        if (event.is(KeyboardEvent.class)) { keyboardEventHandler.onEvent(event); return; }
+        if (event.is(WindowEvent.class)) windowEventHandler.onEvent(event);
     }
 
-    public void updateDeltaTime() {
+    public void beginFrame() {
+        updateMonitors();
+        updateDeltaTime();
+        updateMouseCursor();
+    }
+
+    public void endFrame() {
+        if (io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
+            final var context = glfwGetCurrentContext();
+            ImGui.updatePlatformWindows();
+            ImGui.renderPlatformWindowsDefault();
+            glfwMakeContextCurrent(context);
+        }
+    }
+
+    private void updateDeltaTime() {
         final double currentTime = glfwGetTime();
         io.setDeltaTime(time > 0.0 ? (float) (currentTime - time) : 1.0f / 60.0f);
         time = currentTime;
     }
 
-    public void updateMouseCursor() {
-        final boolean noCursorChange = io.hasConfigFlags(ImGuiConfigFlags.NoMouseCursorChange);
-        final boolean cursorDisabled = glfwGetInputMode(Platform.Window.main, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
+    private void updateMouseCursor() {
+        if (io.hasConfigFlags(ImGuiConfigFlags.NoMouseCursorChange)) return;
+        if (glfwGetInputMode(Platform.Window.main, GLFW_CURSOR) == GLFW_CURSOR_DISABLED) return;
 
-        if (noCursorChange || cursorDisabled) {
-            return;
-        }
-
-        final var imguiCursor = ImGui.getMouseCursor();
-
+        final var cursor = ImGui.getMouseCursor();
+        final var isNone = cursor == ImGuiMouseCursor.None;
         for (int n = 0; n < platform.getViewportsSize(); n++) {
             final var windowPtr = platform.getViewports(n).getPlatformHandle();
 
-            if (imguiCursor == ImGuiMouseCursor.None || io.getMouseDrawCursor()) {
+            if (isNone || io.getMouseDrawCursor()) {
                 // Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
                 glfwSetInputMode(windowPtr, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
             } else {
                 // Show OS mouse cursor
-                // FIXME-PLATFORM: Unfocused windows seems to fail changing the mouse cursor with GLFW 3.2, but 3.3 works here.
-                glfwSetCursor(windowPtr, mouseCursors[imguiCursor] != 0 ? mouseCursors[imguiCursor] : mouseCursors[ImGuiMouseCursor.Arrow]);
+                // Unfocused windows seems to fail changing the mouse cursor with GLFW 3.2, but 3.3 works here.
+                glfwSetCursor(windowPtr, mouseCursors[cursor] != 0 ? mouseCursors[cursor] : mouseCursors[ImGuiMouseCursor.Arrow]);
                 glfwSetInputMode(windowPtr, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             }
         }
     }
 
     private int monitors = 0;
-    public void updateMonitors() {
+    private void updateMonitors() {
         if (Platform.monitors.size() == monitors) return;
         monitors = Platform.monitors.size();
 

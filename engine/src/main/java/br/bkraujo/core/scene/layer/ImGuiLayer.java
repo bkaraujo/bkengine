@@ -9,14 +9,11 @@ import br.bkraujo.engine.scene.layer.LayerType;
 import br.bkraujo.utils.FileUtils;
 import br.bkraujo.utils.Reflections;
 import imgui.ImGui;
-import imgui.flag.ImGuiConfigFlags;
 import imgui.internal.ImGuiContext;
-import org.lwjgl.glfw.GLFW;
 
 import java.nio.file.Path;
 
 import static br.bkraujo.engine.Logger.trace;
-import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 
 public final class ImGuiLayer extends AbstractLayer {
     private ImGuiContext context;
@@ -74,23 +71,14 @@ public final class ImGuiLayer extends AbstractLayer {
     }
 
     protected void doBeforeGui() {
-        viewport.updateMonitors();
-        viewport.updateDeltaTime();
-        viewport.updateMouseCursor();
-
+        viewport.beginFrame();
         ImGui.newFrame();
     }
 
     protected void doAfterGui() {
         ImGui.render();
         renderer.render(ImGui.getDrawData());
-
-        if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
-            final var context = GLFW.glfwGetCurrentContext();
-            ImGui.updatePlatformWindows();
-            ImGui.renderPlatformWindowsDefault();
-            glfwMakeContextCurrent(context);
-        }
+        viewport.endFrame();
     }
 
     protected void doTerminate() {

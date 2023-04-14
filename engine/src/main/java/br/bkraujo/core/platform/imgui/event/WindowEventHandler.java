@@ -1,5 +1,6 @@
 package br.bkraujo.core.platform.imgui.event;
 
+import br.bkraujo.core.platform.Platform;
 import br.bkraujo.core.platform.event.*;
 import br.bkraujo.core.platform.imgui.ViewportData;
 import br.bkraujo.engine.event.Event;
@@ -49,5 +50,16 @@ public class WindowEventHandler implements OnEvent {
         if (data != null && ImGui.getFrameCount() <= data.ignoreWindowSizeEventFrame + 1) return;
 
         viewport.setPlatformRequestResize(true);
+
+        final var size = Platform.window.get(event.getWindow()).size;
+        final var framebuffer = Platform.window.get(event.getWindow()).framebuffer;
+
+        //todo: onWindowResize(...) :: Calculate window position to maintain proportions
+
+        io.setDisplaySize(size.x, size.y);
+        io.setDisplayFramebufferScale(
+                framebuffer.x / (float) size.x,
+                framebuffer.y / (float) size.y
+        );
     }
 }
